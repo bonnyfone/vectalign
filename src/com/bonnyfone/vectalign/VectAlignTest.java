@@ -43,7 +43,7 @@ public class VectAlignTest {
 
     @Test
     public void testCanMorph() throws Exception {
-        System.out.println("Testing canMorph()");
+        System.out.println("Testing canMorph()...");
         boolean shouldMorph = VectAlign.canMorph(star, pentagon);
         assertTrue(shouldMorph);
 
@@ -53,16 +53,21 @@ public class VectAlignTest {
 
     @Test
     public void testIsEquivalent() throws Exception {
-        System.out.println("Testing isEquivalent()");
+        System.out.println("Testing isEquivalent()...");
         assertTrue(PathNodeUtils.isEquivalent(PathNodeUtils.transform(PathParser.createNodesFromPathData(star)), PathNodeUtils.transform(PathParser.createNodesFromPathData(starEquivalent))));
         assertTrue(PathNodeUtils.isEquivalent(PathNodeUtils.transform(PathParser.createNodesFromPathData(star)), PathNodeUtils.transform(PathParser.createNodesFromPathData(star), 2)));
         assertTrue(PathNodeUtils.isEquivalent(PathNodeUtils.transform(PathParser.createNodesFromPathData(megaStar)), PathNodeUtils.transform(PathParser.createNodesFromPathData(megaStar), 2)));
         assertTrue(PathNodeUtils.isEquivalent(PathNodeUtils.transform(PathParser.createNodesFromPathData(megaStar)), PathNodeUtils.transform(PathParser.createNodesFromPathData(megaStar), 5)));
+
+        assertFalse(PathNodeUtils.isEquivalent(PathNodeUtils.transform(PathParser.createNodesFromPathData(megaStar)), PathNodeUtils.transform(PathParser.createNodesFromPathData(star))));
+        assertFalse(PathNodeUtils.isEquivalent(PathNodeUtils.transform(PathParser.createNodesFromPathData(pentagonAlter)), PathNodeUtils.transform(PathParser.createNodesFromPathData(star))));
+        assertFalse(PathNodeUtils.isEquivalent(PathNodeUtils.transform(PathParser.createNodesFromPathData(complex)), PathNodeUtils.transform(PathParser.createNodesFromPathData(supportSample))));
+        assertFalse(PathNodeUtils.isEquivalent(PathNodeUtils.transform(PathParser.createNodesFromPathData(arrow)), PathNodeUtils.transform(PathParser.createNodesFromPathData(square))));
     }
 
     @Test
     public void testTransformations() throws Exception {
-        System.out.println("Testing transformations");
+        System.out.println("Testing transformations...");
 
         PathParser.PathDataNode[] nodesFromPathData = PathParser.createNodesFromPathData(complex);
         ArrayList<PathParser.PathDataNode> transform = PathNodeUtils.transform(nodesFromPathData);
@@ -80,6 +85,7 @@ public class VectAlignTest {
 
     @Test
     public void testRandomAligns() throws Exception {
+        System.out.println("Testing random sequences alignment...");
         ArrayList<PathParser.PathDataNode> all = new ArrayList<>();
         all.addAll(PathNodeUtils.transform(pentagonData));
         all.addAll(PathNodeUtils.transform(pentagonAlterData));
