@@ -181,6 +181,79 @@ public class PathNodeUtils {
         System.out.println("Final size after simplify is "+from.size());
     }
 
+    public static float[][] calculatePenPosition(ArrayList<PathParser.PathDataNode> sequence){
+        float penPos[][] = new float[sequence.size()][2];
+
+        float[] lastStart = new float[]{0 ,0};
+        float currentX = 0;
+        float currentY = 0;
+        boolean saveNewStart = false;
+
+        for(int i=0; i<sequence.size(); i++){
+            PathParser.PathDataNode node = sequence.get(i);
+            if(node.mType == 'z' || node.mType == 'Z'){ //Close path and restart from last start
+                currentX = lastStart[0];
+                currentY = lastStart[1];
+                saveNewStart = true;
+            }
+            else{
+                float[] positionFromParams = getPositionFromParams(node);
+                if(positionFromParams != null){
+                    if(Character.isLowerCase(node.mType)){ //relative movement (it's already correct in case of 'v' or 'h'
+                        currentX += positionFromParams[0];
+                        currentY += positionFromParams[1];
+                    }
+                    else{ //absolute movement
+                        if(i>0 && node.mType == 'V'){
+                            currentX = penPos[i-1][0];
+                            currentY = positionFromParams[1];
+                        }
+                        else if(i>0 && node.mType == 'H'){
+                            currentX = positionFromParams[0];
+                            currentY = penPos[i-1][1];
+                        }
+                        else{
+                            currentX = positionFromParams[0];
+                            currentY = positionFromParams[1];
+                        }
+                    }
+
+                    if(node.mType == 'm' || node.mType == 'M'){
+                        saveNewStart = true;
+                    }
+
+                    if(saveNewStart){
+                        lastStart = new float[]{currentX, currentY};
+                        saveNewStart = false;
+                    }
+                }
+            }
+
+            penPos[i][0] = currentX;
+            penPos[i][1] = currentY;
+        }
+
+        return penPos;
+    }
+
+    static float[] getPositionFromParams(PathParser.PathDataNode node){
+        if(node == null || node.mParams == null || node.mParams.length == 0)
+            return null;
+
+        float[] ris = new float[2];
+
+        if(Character.toLowerCase(node.mType) == 'v'){
+            ris[1] = node.mParams[0];
+        }
+        else if(Character.toLowerCase(node.mType) == 'h'){
+            ris[0] = node.mParams[0];
+        }
+        else{
+            ris[0] = node.mParams[node.mParams.length -2];
+            ris[1] = node.mParams[node.mParams.length -1];
+        }
+        return ris;
+    }
 
     /**
      * Create a VectorDrawable sequence from a list of nodes
