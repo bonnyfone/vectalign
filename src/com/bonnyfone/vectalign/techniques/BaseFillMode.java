@@ -79,6 +79,10 @@ public class BaseFillMode extends AbstractFillMode{
                 listPlaceholder.add(i, extraMoveNodePlaceholder);
                 i++; //next item is already filled, we just added it
 
+                //Recalculate penpos arrays //TODO do this more efficiently
+                penPosFrom = PathNodeUtils.calculatePenPosition(from);
+                penPosTo = PathNodeUtils.calculatePenPosition(to);
+
             }
             else if(Character.isLowerCase(nodePlaceholder.mType)){ // this is a relative movement. If we want to create extra nodes, we need to create neutral relative commands
                 Arrays.fill(nodePlaceholder.mParams, 0.0f); //FIXME is good?
