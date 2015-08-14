@@ -2,6 +2,7 @@ package com.bonnyfone.vectalign.techniques;
 
 import android.support.v7.graphics.drawable.PathParser;
 import com.bonnyfone.vectalign.PathNodeUtils;
+import junit.framework.Assert;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -13,22 +14,33 @@ public class BaseFillMode extends AbstractFillMode{
 
     @Override
     public void fillInjectedNodes(ArrayList<PathParser.PathDataNode> from, ArrayList<PathParser.PathDataNode> to) {
-
         PathParser.PathDataNode nodePlaceholder, nodeMaster;
-        ArrayList<PathParser.PathDataNode> listPlaceholder = null;
+
+        float[][] penPosFrom = PathNodeUtils.calculatePenPosition(from);
+        float[][] penPosTo = PathNodeUtils.calculatePenPosition(to);
+        float[][] penPosPlaceholder = null;
+        float[][] penPosMaster = null;
         ArrayList<PathParser.PathDataNode> listMaster = null;
+        ArrayList<PathParser.PathDataNode> listPlaceholder = null;
+
+
+
         for(int i=0; i < from.size(); i++){
             if(from.get(i).mType == PathNodeUtils.CMD_PLACEHOLDER){
                 nodePlaceholder = from.get(i);
                 nodeMaster = to.get(i);
-                listPlaceholder = from;
+                penPosPlaceholder = penPosFrom;
+                penPosMaster = penPosTo;
                 listMaster = to;
+                listPlaceholder = from;
             }
             else if(to.get(i).mType == PathNodeUtils.CMD_PLACEHOLDER){
                 nodePlaceholder = to.get(i);
                 nodeMaster = from.get(i);
-                listPlaceholder = to;
+                penPosPlaceholder = penPosTo;
+                penPosMaster = penPosFrom;
                 listMaster = from;
+                listPlaceholder = to;
             }
             else{
                 nodeMaster = null;
@@ -38,34 +50,105 @@ public class BaseFillMode extends AbstractFillMode{
             if(nodeMaster == null || nodePlaceholder == null)
                 continue;
 
+
             nodePlaceholder.mType = nodeMaster.mType;
             nodePlaceholder.mParams = PathParser.copyOfRange(nodeMaster.mParams, 0, nodeMaster.mParams.length);
 
-            if(Character.isLowerCase(nodePlaceholder.mType)){ // this is a relative movement. If we want to create extra nodes, we need to create neutral relative commands
+            float lastPlaceholderX, lastPlaceholderY, lastMasterX, lastMasterY;
+            if(i>0){
+                lastPlaceholderX = penPosPlaceholder[i-1][0];
+                lastPlaceholderY = penPosPlaceholder[i-1][1];
+                lastMasterX = penPosMaster[i-1][0];
+                lastMasterY = penPosMaster[i-1][1];
+            }
+            else{
+                lastPlaceholderX = 0;
+                lastPlaceholderY = 0;
+                lastMasterX = 0;
+                lastMasterY = 0;
+            }
+
+            if(Character.toLowerCase(nodeMaster.mType) == 'z'){
+             /*TODO   se si injecta una z, va bilanciata subito dopo con un move alla posizione precedente!
+              TODO   Ovviamente va aggiunto anche un move sulla lista con la quale si sta bilanciando in modo da non rompere l'allineamento'
+            */
+                PathParser.PathDataNode extraMoveNodePlaceholder = new PathParser.PathDataNode('M', new float[]{lastPlaceholderX, lastPlaceholderY});
+                PathParser.PathDataNode extraMoveNodeMaster = new PathParser.PathDataNode('M', new float[]{lastMasterX, lastMasterY});
+
+                listMaster.add(i, extraMoveNodeMaster);
+                listPlaceholder.add(i, extraMoveNodePlaceholder);
+                i++; //next item is already filled, we just added it
+
+            }
+            else if(Character.isLowerCase(nodePlaceholder.mType)){ // this is a relative movement. If we want to create extra nodes, we need to create neutral relative commands
                 Arrays.fill(nodePlaceholder.mParams, 0.0f); //FIXME is good?
             }
-            else{ //TODO calcolare spostamenti esatti nel caso in cui ci siano movimenti relativi! va calcolato lo spostamento dall'inizio
-                float lastX, lastY;
-                int index = i-1;
-                if(index<0){
-                    index = i+1;
-                    while(index < listPlaceholder.size() && listPlaceholder.get(index).mType == PathNodeUtils.CMD_PLACEHOLDER)
-                        index++;
+            else{
+                if(nodePlaceholder.mType == 'V'){
+                    nodePlaceholder.mParams[0] =  lastPlaceholderY;
                 }
-
-                //TODO gestire comandi con un solo parametro! tipo 'v'
-                if(listPlaceholder.get(index).mParams.length >= 2){
-
-                    lastX = listPlaceholder.get(index).mParams[ listPlaceholder.get(index).mParams.length-2];
-                    lastY = listPlaceholder.get(index).mParams[ listPlaceholder.get(index).mParams.length-1];
-
+                else if (nodePlaceholder.mType == 'H') {
+                    nodePlaceholder.mParams[0] =  lastPlaceholderX;
+                }
+                else{
                     for(int j = 0; j< nodePlaceholder.mParams.length; j++){
-                        nodePlaceholder.mParams[j++] = lastX;
-                        nodePlaceholder.mParams[j] = lastY;
+                        nodePlaceholder.mParams[j++] = lastPlaceholderX;
+                        nodePlaceholder.mParams[j] = lastPlaceholderY;
                     }
                 }
             }
 
         }
+
+        float[][] penPosFromAfter = PathNodeUtils.calculatePenPosition(from);
+        float[][] penPosToAfter = PathNodeUtils.calculatePenPosition(to);
+
+        if(        (penPosFromAfter[penPosFromAfter.length-1][0] == penPosFrom[penPosFrom.length-1][0])
+                && (penPosFromAfter[penPosFromAfter.length-1][1] == penPosFrom[penPosFrom.length-1][1])
+                && (penPosToAfter[penPosToAfter.length-1][0] == penPosTo[penPosTo.length-1][0])
+                && (penPosToAfter[penPosToAfter.length-1][1] == penPosTo[penPosTo.length-1][1])){
+
+            System.out.println("Injection completed correctly!");
+        }
+        else{
+            System.out.println("PROBLEM during injection!");
+            System.out.println("PenPos from");
+            StringBuffer sb = new StringBuffer();
+            int i = 0;
+            for(float[] coord : penPosFrom){
+                sb.append((++i)+"p. " +coord[0]+" , "+coord[1] +"\n") ;
+            }
+            System.out.println(sb.toString());
+
+
+            System.out.println("PenPos fromAfter");
+            sb = new StringBuffer();
+            i = 0;
+            for(float[] coord : penPosFromAfter){
+                sb.append((++i)+"p. " +coord[0]+" , "+coord[1] +"\n") ;
+            }
+            System.out.println(sb.toString());
+
+
+            System.out.println("PenPos to");
+            sb = new StringBuffer();
+            i = 0;
+            for(float[] coord : penPosTo){
+                sb.append((++i)+"p. " +coord[0]+" , "+coord[1] +"\n") ;
+            }
+            System.out.println(sb.toString());
+
+
+            System.out.println("PenPos toAfter");
+            sb = new StringBuffer();
+            i = 0;
+            for(float[] coord : penPosToAfter){
+                sb.append((++i)+"p. " +coord[0]+" , "+coord[1] +"\n") ;
+            }
+            System.out.println(sb.toString());
+
+
+        }
+
     }
 }
