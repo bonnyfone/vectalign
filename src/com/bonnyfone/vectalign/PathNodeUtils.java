@@ -66,7 +66,7 @@ public class PathNodeUtils {
             boolean found = false;
             for(int i = innerStart; i < alternative.size() && !found; i++ ){
                 PathParser.PathDataNode n = alternative.get(i);
-                if(o.mType == n.mType && Arrays.equals(o.mParams, n.mParams)){
+                if((o.mType == n.mType && Arrays.equals(o.mParams, n.mParams)) || ((o.mType == 'Z' || o.mType == 'z') && n.mType == 'L' /*transformZ*/)){
                     found = true;
                     innerStart = i+1;
                 }
@@ -80,7 +80,7 @@ public class PathNodeUtils {
     }
 
     static ArrayList<PathParser.PathDataNode> transform(PathParser.PathDataNode[] elements){
-        return transform(elements, 0);
+        return transform(elements, 0, true);
     }
 
     /**
@@ -89,14 +89,19 @@ public class PathNodeUtils {
      * @param extraCopy
      * @return
      */
-    static ArrayList<PathParser.PathDataNode> transform(PathParser.PathDataNode[] elements, int extraCopy){
+    static ArrayList<PathParser.PathDataNode> transform(PathParser.PathDataNode[] elements, int extraCopy, boolean transformZ){
         if(elements == null)
             return null;
 
         ArrayList<PathParser.PathDataNode> transformed = new ArrayList<>();
         for(PathParser.PathDataNode node : elements){
+
             int cmdArgs = commandArguments(node.mType);
             int argsProvided = node.mParams.length;
+
+            if(node.mType == 'z')
+                node.mType = 'Z';
+
             if(cmdArgs == -1){
                 System.err.println("Command not supported! " + node.mType);
             }
@@ -106,7 +111,7 @@ public class PathNodeUtils {
             else if(cmdArgs == node.mParams.length){
                 //Normal command with the exact number of params
                 transformed.add(node);
-                if(extraCopy > 0 && node.mType != 'z' && node.mType != 'Z' && node.mType != PathNodeUtils.CMD_DUMB){ //never add extra z/Z or dumb commands
+                if(extraCopy > 0 && (transformZ || node.mType != 'Z') && node.mType != PathNodeUtils.CMD_DUMB){ //never add extra z/Z or dumb commands
                     PathParser.PathDataNode extraNodes = new PathParser.PathDataNode(node);
                     if(Character.isLowerCase(node.mType)){ // this is a relative movement. If we want to create extra nodes, we need to create neutral relative commands
                         Arrays.fill(extraNodes.mParams, 0.0f); //FIXME is good?
@@ -142,6 +147,20 @@ public class PathNodeUtils {
                 }
             }
         }
+
+
+        if(transformZ){
+            float[][] penPos = PathNodeUtils.calculatePenPosition(transformed);
+            int i = 0;
+            for(PathParser.PathDataNode node : transformed){
+                if(node.mType == 'Z'){
+                    node.mType = 'L';
+                    node.mParams = penPos[i];
+                }
+                i++;
+            }
+        }
+
         return transformed;
     }
 
@@ -260,7 +279,7 @@ public class PathNodeUtils {
      * @param nodes
      * @return
      */
-    static String pathNodesToString(ArrayList<PathParser.PathDataNode> nodes, boolean onlyCommands){
+    public static String pathNodesToString(ArrayList<PathParser.PathDataNode> nodes, boolean onlyCommands){
         StringBuilder sb = new StringBuilder();
         for(PathParser.PathDataNode n : nodes){
             sb.append(n.mType);

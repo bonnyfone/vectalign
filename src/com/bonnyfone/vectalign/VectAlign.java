@@ -74,7 +74,7 @@ public class VectAlign {
 
             for(int i = 0; i < MAX_ALIGN_ITERATIONS && !equivalent; i++){
                 System.out.println(i + ". align iteration...");
-                NWAlignment nw = new NWAlignment(PathNodeUtils.transform(fromList, extraCloneNodes), PathNodeUtils.transform(toList, extraCloneNodes));
+                NWAlignment nw = new NWAlignment(PathNodeUtils.transform(fromList, extraCloneNodes, true), PathNodeUtils.transform(toList, extraCloneNodes, true));
                 nw.align();
                 alignedFrom = nw.getAlignedFrom();
                 alignedTo = nw.getAlignedTo();

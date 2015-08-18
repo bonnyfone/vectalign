@@ -55,9 +55,9 @@ public class VectAlignTest {
     public void testIsEquivalent() throws Exception {
         System.out.println("Testing isEquivalent()...");
         assertTrue(PathNodeUtils.isEquivalent(PathNodeUtils.transform(PathParser.createNodesFromPathData(star)), PathNodeUtils.transform(PathParser.createNodesFromPathData(starEquivalent))));
-        assertTrue(PathNodeUtils.isEquivalent(PathNodeUtils.transform(PathParser.createNodesFromPathData(star)), PathNodeUtils.transform(PathParser.createNodesFromPathData(star), 2)));
-        assertTrue(PathNodeUtils.isEquivalent(PathNodeUtils.transform(PathParser.createNodesFromPathData(megaStar)), PathNodeUtils.transform(PathParser.createNodesFromPathData(megaStar), 2)));
-        assertTrue(PathNodeUtils.isEquivalent(PathNodeUtils.transform(PathParser.createNodesFromPathData(megaStar)), PathNodeUtils.transform(PathParser.createNodesFromPathData(megaStar), 5)));
+        assertTrue(PathNodeUtils.isEquivalent(PathNodeUtils.transform(PathParser.createNodesFromPathData(star)), PathNodeUtils.transform(PathParser.createNodesFromPathData(star), 2, true)));
+        assertTrue(PathNodeUtils.isEquivalent(PathNodeUtils.transform(PathParser.createNodesFromPathData(megaStar)), PathNodeUtils.transform(PathParser.createNodesFromPathData(megaStar), 2, true)));
+        assertTrue(PathNodeUtils.isEquivalent(PathNodeUtils.transform(PathParser.createNodesFromPathData(megaStar)), PathNodeUtils.transform(PathParser.createNodesFromPathData(megaStar), 5, true)));
 
         assertFalse(PathNodeUtils.isEquivalent(PathNodeUtils.transform(PathParser.createNodesFromPathData(megaStar)), PathNodeUtils.transform(PathParser.createNodesFromPathData(star))));
         assertFalse(PathNodeUtils.isEquivalent(PathNodeUtils.transform(PathParser.createNodesFromPathData(pentagonAlter)), PathNodeUtils.transform(PathParser.createNodesFromPathData(star))));
@@ -96,8 +96,8 @@ public class VectAlignTest {
         System.out.println("Testing final pen position...");
         float[][] penPos1 = PathNodeUtils.calculatePenPosition(PathNodeUtils.transform(supportData));
         float[][] penPos2 = PathNodeUtils.calculatePenPosition(PathNodeUtils.transform(starData));
-        ArrayList<PathParser.PathDataNode> transform1 = PathNodeUtils.transform(supportData, 2);
-        ArrayList<PathParser.PathDataNode> transform2 = PathNodeUtils.transform(starData, 2);
+        ArrayList<PathParser.PathDataNode> transform1 = PathNodeUtils.transform(supportData, 2, true);
+        ArrayList<PathParser.PathDataNode> transform2 = PathNodeUtils.transform(starData, 2, true);
         NWAlignment nwexp = new NWAlignment(transform1, transform2);
         nwexp.align();
         BaseFillMode fillMode = new BaseFillMode();
@@ -169,7 +169,7 @@ public class VectAlignTest {
         all.addAll(PathNodeUtils.transform(romboData));
         all.addAll(PathNodeUtils.transform(squareData));
 
-        int experiments = 100;
+        int experiments = 1000;
         int extraCopyInTransform = 2;
         Random r = new Random(System.currentTimeMillis());
         ArrayList<PathParser.PathDataNode> l1 = new ArrayList<>();
@@ -207,8 +207,8 @@ public class VectAlignTest {
                 fail++;
                 System.out.println("CAN'T MORPH");
 
-                ArrayList<PathParser.PathDataNode> transform1 = PathNodeUtils.transform(l1.toArray(new PathParser.PathDataNode[0]), extraCopyInTransform);
-                ArrayList<PathParser.PathDataNode> transform2 = PathNodeUtils.transform(l2.toArray(new PathParser.PathDataNode[0]), extraCopyInTransform);
+                ArrayList<PathParser.PathDataNode> transform1 = PathNodeUtils.transform(l1.toArray(new PathParser.PathDataNode[0]), extraCopyInTransform, true);
+                ArrayList<PathParser.PathDataNode> transform2 = PathNodeUtils.transform(l2.toArray(new PathParser.PathDataNode[0]), extraCopyInTransform, true);
                 NWAlignment nwexp = new NWAlignment(transform1, transform2);
                 nwexp.align();
                 if(!PathNodeUtils.isEquivalent(nwexp.getOriginalFrom(), nwexp.getAlignedFrom()) || !PathNodeUtils.isEquivalent(nwexp.getOriginalTo(), nwexp.getAlignedTo())){
