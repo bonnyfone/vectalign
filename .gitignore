@@ -1,2 +1,4 @@
 .idea/
 out/
+src/META-INF/
+src/com/bonnyfone/vectalign/MainTest.java
