@@ -23,8 +23,6 @@ public class BaseFillMode extends AbstractFillMode{
         ArrayList<PathParser.PathDataNode> listMaster = null;
         ArrayList<PathParser.PathDataNode> listPlaceholder = null;
 
-
-
         for(int i=0; i < from.size(); i++){
             if(from.get(i).mType == PathNodeUtils.CMD_PLACEHOLDER){
                 nodePlaceholder = from.get(i);
@@ -69,9 +67,7 @@ public class BaseFillMode extends AbstractFillMode{
             }
 
             if(Character.toLowerCase(nodeMaster.mType) == 'z'){
-             /*TODO   se si injecta una z, va bilanciata subito dopo con un move alla posizione precedente!
-              TODO   Ovviamente va aggiunto anche un move sulla lista con la quale si sta bilanciando in modo da non rompere l'allineamento'
-            */
+                //Injecting a 'z' means we need to counterbalance the last path position with an extra 'm'
                 PathParser.PathDataNode extraMoveNodePlaceholder = new PathParser.PathDataNode('M', new float[]{lastPlaceholderX, lastPlaceholderY});
                 PathParser.PathDataNode extraMoveNodeMaster = new PathParser.PathDataNode('M', new float[]{lastMasterX, lastMasterY});
 

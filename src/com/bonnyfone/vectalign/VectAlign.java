@@ -22,12 +22,9 @@ public class VectAlign {
         /**
          * Inject necessary elements by repeating existing ones
          */
-        BASE(1),
+        BASE(1);
 
-        /**
-         * Inject necessary elements by interpolating between existing ones
-         */
-        LINEAR(2);
+        //TODO more technique
 
 
         private int mode;
@@ -66,7 +63,8 @@ public class VectAlign {
             result = new String[]{from, to};
         }
         else{
-            //NW Align
+
+            //Aligning
             boolean equivalent = false;
             int extraCloneNodes = 0;
             ArrayList<PathParser.PathDataNode> alignedFrom = null;
@@ -101,8 +99,7 @@ public class VectAlign {
                     fillMode = new BaseFillMode();
                     break;
 
-                case LINEAR:
-                    break;
+               //TODO handle more cases here
             }
 
             //Fill

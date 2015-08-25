@@ -55,7 +55,8 @@ public class PathNodeUtils {
 
 
     /**
-     * Check if the given node sequences are equivalent (in terms of graphic commands)
+     * Check if the given node sequences are equivalent (in terms of incremental graphic commands).
+     * //FIXME this is an approximated method
      * @param original
      * @param alternative
      * @return
