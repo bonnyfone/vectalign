@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Comparator;
 
 /**
  * VectorCompatAlign commandline tool
@@ -53,6 +54,17 @@ public class Main {
                 String header = "\nAlign VectorDrawable sequences in order to allow morphing animations between them\n\n";
                 String footer = "\nPlease report issues at https://github.com/bonnyfone/vectalign";
                 HelpFormatter formatter = new HelpFormatter();
+                formatter.setOptionComparator(new Comparator<Option>() {
+                    @Override
+                    public int compare(Option o1, Option o2) {
+                        if(o1.hasArgs())
+                            return 1;
+                        else if(o2.hasArgs())
+                            return -1;
+
+                        return 0;
+                    }
+                });
                 formatter.printHelp("java -jar vectalign.jar ", header, options, footer, true);
                 return;
             }
