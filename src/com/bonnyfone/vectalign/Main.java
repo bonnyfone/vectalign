@@ -1,6 +1,7 @@
 package com.bonnyfone.vectalign;
 
 
+import com.sun.org.apache.xpath.internal.SourceTree;
 import org.apache.commons.cli.*;
 
 import java.io.File;
@@ -19,7 +20,7 @@ public class Main {
     private static final String OPTION_VERSION = "v";
 
     //Application infos
-    private static final String VERSION = "0.1";
+    private static final String VERSION = "0.1.0";
     private static final String NAME = "VectAlign";
 
 
@@ -79,8 +80,26 @@ public class Main {
                 }
             }
 
+            if(fromSequence == null || toSequence == null){
+                if(fromSequence == null)
+                    System.out.println("Missing START path sequence. Specify the starting path using -s (or --start)");
+                else
+                    System.out.println("Missing END path sequence. Specify the ending path using -e (or --end)");
 
-            String[] align = VectAlign.align(fromSequence, toSequence, VectAlign.Mode.BASE);
+                return;
+            }
+
+            String[] align = null;
+            try{
+                align = VectAlign.align(fromSequence, toSequence, VectAlign.Mode.BASE);
+            }
+            catch (Exception e){
+                System.out.println("###################### EXCEPTION #####################");
+                e.printStackTrace();
+                System.out.println("######################################################");
+                System.out.println("\nFor contributions or issues reporting, please visit " + Utils.ANSI_CYAN + "https://github.com/bonnyfone/vectalign \n "+ Utils.ANSI_RESET);
+            }
+
             if(align == null){
                 //Something went wrong, read exceptions!
                 return;
@@ -89,9 +108,9 @@ public class Main {
             System.out.println("\n--------------------");
             System.out.println("  ALIGNMENT RESULT  ");
             System.out.println("-------------------- ");
-            System.out.println("\n# new START sequence:  \n" + Utils.ANSI_BLUE + align[0] + Utils.ANSI_RESET);
-            System.out.println("\n# new END sequence:  \n" + Utils.ANSI_BLUE +align[1] + Utils.ANSI_RESET);
-            System.out.println("\nNow, substitute your original sequences with the new aligned ones in your Android project.\n");
+            System.out.println("\n# new START path:  \n" + Utils.ANSI_GREEN + align[0] + Utils.ANSI_RESET);
+            System.out.println("\n# new END path:  \n" + Utils.ANSI_YELLOW +align[1] + Utils.ANSI_RESET);
+            System.out.println("\nThese sequences are morphable and can be used as 'pathData' attributes inside of VectorDrawable files.\n");
 
         } catch (ParseException e) {
             System.out.println("Wrong parameters!\n");
@@ -106,8 +125,8 @@ public class Main {
      * @param options
      */
     private static void printHelp(Options options){
-        String header = "\nAlign two VectorDrawable sequences in order to allow morphing animations between them.\n\n";
-        String footer = "\nFor contributions or issues reporting, please visit https://github.com/bonnyfone/vectalign";
+        String header = "\nAlign two VectorDrawable paths in order to allow morphing animations between them.\n\n";
+        String footer = "\nFor contributions or issues reporting, please visit"+ Utils.ANSI_CYAN + " https://github.com/bonnyfone/vectalign \n "+ Utils.ANSI_RESET;
         HelpFormatter formatter = new HelpFormatter();
         formatter.setOptionComparator(new Comparator<Option>() {
             @Override
@@ -132,20 +151,20 @@ public class Main {
         Options options = new Options();
 
         options.addOption(OptionBuilder.withLongOpt("start")
-                .withDescription("VectorDrawable sequence (or SVG file) which represents the starting image")
+                .withDescription("Starting VectorDrawable path (\"string\", txt file or SVG file)")
                 .hasArg()
-                .withArgName("SEQUENCE | TXT_FILE | SVG_FILE")
+                .withArgName("\"STRING\"|TXT_FILE|SVG_FILE")
                 .create(OPTION_FROM));
 
         options.addOption(OptionBuilder.withLongOpt("end")
-                .withDescription("VectorDrawable sequence (or SVG file) which represents the ending image")
+                .withDescription("Ending VectorDrawable path (\"string\", txt file or SVG file)")
                 .hasArg()
-                .withArgName("SEQUENCE | TXT_FILE | SVG_FILE")
+                .withArgName("\"STRING\"|TXT_FILE|SVG_FILE")
                 .create(OPTION_TO));
 
         options.addOption(OptionBuilder.withLongOpt("version")
                 .withDescription("Print the version of the application")
-                .create('v'));
+                .create(OPTION_VERSION));
 
         options.addOption(OptionBuilder.withLongOpt("help").create(OPTION_HELP));
 
