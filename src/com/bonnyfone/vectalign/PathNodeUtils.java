@@ -1,6 +1,8 @@
 package com.bonnyfone.vectalign;
 
 import android.support.v7.graphics.drawable.PathParser;
+
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -281,13 +283,21 @@ public class PathNodeUtils {
      * @return
      */
     public static String pathNodesToString(ArrayList<PathParser.PathDataNode> nodes, boolean onlyCommands){
+
+        //Format float to avoid scientific notation
+        DecimalFormat floatFormatter = new DecimalFormat("###.#########");
+
         StringBuilder sb = new StringBuilder();
         for(PathParser.PathDataNode n : nodes){
             sb.append(n.mType);
             sb.append(' ');
             if(!onlyCommands){
                 for(float p : n.mParams){
-                    sb.append(p);
+                    if((""+p).contains("e") || (""+p).contains("E")) //apply decimal format only for scientific notation number
+                        sb.append(floatFormatter.format(p));
+                    else
+                        sb.append(p);
+
                     sb.append(',');
                 }
                 sb.replace(sb.length()-1, sb.length()," ");
