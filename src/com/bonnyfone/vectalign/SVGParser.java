@@ -24,6 +24,7 @@ public class SVGParser {
      */
     public static boolean isSVGImage(File f){
         try {
+            System.out.println("Checking if " + f.getAbsolutePath() + " is an SVG file...");
             Document document = getXMLDocumentFromFile(f);
             boolean headerSVG = document.getDoctype() != null && document.getDoctype().getName().toLowerCase().equals("svg");
             if(headerSVG)
@@ -32,7 +33,7 @@ public class SVGParser {
                 return document.getElementsByTagName("svg") != null;
             }
 
-        } catch (Exception e) {e.printStackTrace();}
+        } catch (Exception e) {}
 
         return false;
     }

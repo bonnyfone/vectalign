@@ -61,6 +61,7 @@ public class VectAlign {
 
         if(PathParser.canMorph(fromList, toList)){
             result = new String[]{from, to};
+            System.out.println(" >> Paths are already morphable!!! Leaving sequences untouched <<");
         }
         else{
 
