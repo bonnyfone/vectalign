@@ -25,8 +25,14 @@ public class SVGParser {
     public static boolean isSVGImage(File f){
         try {
             Document document = getXMLDocumentFromFile(f);
-            return document.getDoctype().getName().toLowerCase().equals("svg");
-        } catch (Exception e) {}
+            boolean headerSVG = document.getDoctype() != null && document.getDoctype().getName().toLowerCase().equals("svg");
+            if(headerSVG)
+                return true;
+            else{
+                return document.getElementsByTagName("svg") != null;
+            }
+
+        } catch (Exception e) {e.printStackTrace();}
 
         return false;
     }
