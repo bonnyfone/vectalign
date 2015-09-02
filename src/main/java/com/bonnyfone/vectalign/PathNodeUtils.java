@@ -63,7 +63,7 @@ public class PathNodeUtils {
      * @param alternative
      * @return
      */
-    static boolean isEquivalent(ArrayList<PathParser.PathDataNode> original, ArrayList<PathParser.PathDataNode> alternative){
+    public static boolean isEquivalent(ArrayList<PathParser.PathDataNode> original, ArrayList<PathParser.PathDataNode> alternative){
         int innerStart = 0;
         for(PathParser.PathDataNode o : original){
             boolean found = false;
@@ -82,7 +82,7 @@ public class PathNodeUtils {
         return true;
     }
 
-    static ArrayList<PathParser.PathDataNode> transform(PathParser.PathDataNode[] elements){
+    public static ArrayList<PathParser.PathDataNode> transform(PathParser.PathDataNode[] elements){
         return transform(elements, 0, true);
     }
 
@@ -92,7 +92,7 @@ public class PathNodeUtils {
      * @param extraCopy
      * @return
      */
-    static ArrayList<PathParser.PathDataNode> transform(PathParser.PathDataNode[] elements, int extraCopy, boolean transformZ){
+    public static ArrayList<PathParser.PathDataNode> transform(PathParser.PathDataNode[] elements, int extraCopy, boolean transformZ){
         if(elements == null)
             return null;
 
@@ -306,7 +306,7 @@ public class PathNodeUtils {
         return sb.toString();
     }
 
-    static String pathNodesToString(ArrayList<PathParser.PathDataNode> nodes){
+    public static String pathNodesToString(ArrayList<PathParser.PathDataNode> nodes){
         return pathNodesToString(nodes, false);
     }
 }

@@ -1,5 +1,3 @@
-package com.bonnyfone.vectalign;
-
 import android.support.v7.graphics.drawable.PathParser;
 import com.bonnyfone.vectalign.PathNodeUtils;
 import com.bonnyfone.vectalign.VectAlign;

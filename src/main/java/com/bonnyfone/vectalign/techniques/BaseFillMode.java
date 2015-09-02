@@ -2,7 +2,6 @@ package com.bonnyfone.vectalign.techniques;
 
 import android.support.v7.graphics.drawable.PathParser;
 import com.bonnyfone.vectalign.PathNodeUtils;
-import junit.framework.Assert;
 
 import java.util.ArrayList;
 import java.util.Arrays;
