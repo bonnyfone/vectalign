@@ -2,13 +2,13 @@
 
 **VectAlign** (a.k.a. *VectorDrawableAlign*) is a command line tool which automagically **aligns two `VectorDrawable` "pathData" strings in order to allow morphing animations** between them through an `AnimatedVectorDrawable`. 
 
-Here are some examples of what you can do with the help of VectAlign:
+Here are some examples of what you can do with the help of VectAlign (take a look at the [sample project] for a live demo):
 
-![Morphing example 1](http://s4.postimg.org/boxc1zk0p/morph2.gif)
-![Morphing example 2](http://s21.postimg.org/4657b7m0j/morph1.gif)
-![Morphing example 3](http://s28.postimg.org/8mdcxb48t/morph5.gif)
-![Morphing example 4](http://s18.postimg.org/79coo8vid/morph3.gif)
-![Morphing example 5](http://s9.postimg.org/a5tdgfppn/morph4.gif)
+<img src="http://s4.postimg.org/boxc1zk0p/morph2.gif" width="110px">
+<img src="http://s21.postimg.org/4657b7m0j/morph1.gif" width="110px">
+<img src="http://s28.postimg.org/8mdcxb48t/morph5.gif" width="110px">
+<img src="http://s18.postimg.org/79coo8vid/morph3.gif" width="110px">
+<img src="http://s9.postimg.org/a5tdgfppn/morph4.gif" width="110px">
 
 
 As stated in the [official docs] two paths must be *compatible* so that can be morphed, which means that the **paths must be composed by the same list of SVG commands** (in terms of length and type of commands). 
@@ -141,3 +141,4 @@ limitations under the License.
 [official docs]:https://developer.android.com/reference/android/graphics/drawable/AnimatedVectorDrawable.html
 [SVG Paths Specification]:http://www.w3.org/TR/SVG/paths.html
 [VectorDrawableCompat on support library v7 (partial)]:https://android.googlesource.com/platform/frameworks/support/+/master/v7/vectordrawable/src/android/support/v7/graphics/drawable
+[sample project]:https://github.com/bonnyfone/vectalign-samples/
