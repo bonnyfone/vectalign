@@ -5,8 +5,8 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.bonnyfone.vectalign</groupId>
-    <artifactId>VectAlign</artifactId>
-    <version>0.1-SNAPSHOT</version>
+    <artifactId>vectalign</artifactId>
+    <version>0.1</version>
 
     <dependencies>
         <dependency>
