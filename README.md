@@ -1,4 +1,4 @@
-# VectAlign [ ![Download](https://api.bintray.com/packages/bonnyfone/maven/org.bonnyfone.vectalign/images/download.svg) ](https://bintray.com/artifact/download/bonnyfone/maven/vectalign-0.1-jar-with-dependencies.jar)
+# VectAlign [ ![Download](https://api.bintray.com/packages/bonnyfone/maven/org.bonnyfone.vectalign/images/download.svg) ](https://bintray.com/artifact/download/bonnyfone/maven/vectalign-0.1-jar-with-dependencies.jar) [![Android Arsenal](https://img.shields.io/badge/Android%20Arsenal-VectAlign-brightgreen.svg?style=flat)](http://android-arsenal.com/details/1/2443)
 
 **VectAlign** (a.k.a. *VectorDrawableAlign*) is a command line tool which automagically **aligns two `VectorDrawable` "pathData" strings in order to allow morphing animations** between them through an `AnimatedVectorDrawable`. 
 
