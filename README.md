@@ -11,7 +11,7 @@ Here are some examples of what you can do with the help of VectAlign (take a loo
 <img src="http://s9.postimg.org/a5tdgfppn/morph4.gif" width="140px">
 
 
-As stated in the [official docs] two paths must be *compatible* so that can be morphed, which means that the **paths must be composed by the same list of SVG commands** (in terms of length and type of commands). 
+As stated in the [official docs] two paths must be *compatible* so that they can be morphed, which means that the **paths must be composed by the same list of SVG commands** (in terms of length and type of commands). 
 
 Example of **compatible paths**: 
 ```a
@@ -33,11 +33,13 @@ android.view.InflateException: Binary XML file line #3 Can't morph from M 10,10 
         at android.animation.AnimatorInflater.parseAnimatorFromTypeArray(AnimatorInflater.java:283)
 ...
 ```
-When the morphing involves only simple shapes is averagely simple to fix the paths by manually injecting or duplicating commands here and there; but when the complexity of the shapes grows, this task become quite tedious to do by hand (sometimes almost impossible). 
-**VectAlign automagically aligns any pair of SVG paths (regardless their complexity) creating a new pair of morphable paths without altering the original images.**
+When the morphing involves only simple shapes is averagely simple to fix the paths by manually injecting or duplicating commands here and there; but when the complexity of the shapes grows, this task becomes quite tedious to do by hand (sometimes almost impossible). 
+**VectAlign automagically aligns any pair of SVG paths (regardless of their complexity), creating a new pair of morphable paths without altering the original images.**
 
 
-
+ Download
+--
+You can download the latest version of the pre-compiled jar from **[here]**.
 
 
  Usage
@@ -103,7 +105,7 @@ Tips
 --
  - When morphing complex aligned paths, for best result **avoid using the `fillColor` attribute  in your `VectorDrawable` and use the `strokeColor` only**. This because filled surfaces are more likely to be affected by artifacts than the stroke-only ones and usually provide less gorgeous morphing effects.
  - As general rule, *similar* images (in terms of SVG complexity) morph better than very different ones.
- - If you don't like the result of a morphing, try to alter the original images by simplifying the SVG path (e.g. using [InkScape]) and then run VectAlign again
+ - If you don't like the result of a morphing, try to alter the original images by simplifying the SVG path (e.g. using [InkScape]) and then run VectAlign again.
  - Since *AnimatedVectorDrawable* is API 21+ you can use the [vector-compat] library to extend support down to API 14+.
 
 References
@@ -142,3 +144,4 @@ limitations under the License.
 [SVG Paths Specification]:http://www.w3.org/TR/SVG/paths.html
 [VectorDrawableCompat on support library v7 (partial)]:https://android.googlesource.com/platform/frameworks/support/+/master/v7/vectordrawable/src/android/support/v7/graphics/drawable
 [sample project]:https://github.com/bonnyfone/vectalign-samples/
+[here]:https://bintray.com/artifact/download/bonnyfone/maven/vectalign-0.1-jar-with-dependencies.jar
