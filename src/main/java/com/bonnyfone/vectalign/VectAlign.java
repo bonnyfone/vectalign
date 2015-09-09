@@ -3,6 +3,7 @@ package com.bonnyfone.vectalign;
 import android.support.v7.graphics.drawable.PathParser;
 import com.bonnyfone.vectalign.techniques.AbstractFillMode;
 import com.bonnyfone.vectalign.techniques.BaseFillMode;
+import com.bonnyfone.vectalign.techniques.LinearInterpolateFillMode;
 import com.bonnyfone.vectalign.techniques.NWAlignment;
 
 import java.util.ArrayList;
@@ -22,7 +23,12 @@ public class VectAlign {
         /**
          * Inject necessary elements by repeating existing ones
          */
-        BASE(1);
+        BASE(1),
+
+        /**
+         * Inject necessary elements and interpolates coordinates where possible
+         */
+        LINEAR_INTERPOLATE(2);
 
         //TODO more technique
 
@@ -98,6 +104,10 @@ public class VectAlign {
             switch (alignMode){
                 case BASE:
                     fillMode = new BaseFillMode();
+                    break;
+
+                case LINEAR_INTERPOLATE:
+                    fillMode = new LinearInterpolateFillMode();
                     break;
 
                //TODO handle more cases here
