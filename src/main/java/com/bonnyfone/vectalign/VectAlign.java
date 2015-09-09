@@ -28,7 +28,7 @@ public class VectAlign {
         /**
          * Inject necessary elements and interpolates coordinates where possible
          */
-        LINEAR_INTERPOLATE(2);
+        LINEAR(2);
 
         //TODO more technique
 
@@ -64,6 +64,7 @@ public class VectAlign {
         PathParser.PathDataNode[] toList = PathParser.createNodesFromPathData(to);
 
         System.out.println("Sequences sizes: " + fromList.length  + " / " + toList.length);
+        System.out.println("Aligning mode: "+ alignMode);
 
         if(PathParser.canMorph(fromList, toList)){
             result = new String[]{from, to};
@@ -106,7 +107,7 @@ public class VectAlign {
                     fillMode = new BaseFillMode();
                     break;
 
-                case LINEAR_INTERPOLATE:
+                case LINEAR:
                     fillMode = new LinearInterpolateFillMode();
                     break;
 
