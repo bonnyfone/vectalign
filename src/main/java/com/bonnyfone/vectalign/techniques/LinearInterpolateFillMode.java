@@ -35,6 +35,8 @@ public class LinearInterpolateFillMode extends BaseFillMode {
         if(list == null || list.size() <= 2)
             return;
 
+        float[][] listPenPos = PathNodeUtils.calculatePenPosition(list);
+
         //find subsequence of interpolatable commands
         ArrayList<PathParser.PathDataNode> subList = new ArrayList<>();
 
@@ -52,19 +54,23 @@ public class LinearInterpolateFillMode extends BaseFillMode {
             boolean validSequence = true;
             int k = i;
             for(int j=i; j < size && validSequence; j++ ){
-                if(currentNode.mType == list.get(j).mType && Arrays.equals(currentNode.mParams, list.get(j).mParams))
+                if(currentNode.mType == list.get(j).mType){
                     k = j;
+                    if(!Arrays.equals(currentNode.mParams, list.get(j).mParams))
+                        break;
+                }
+                //TODO else if there's another compatible command (a sequence of L can interpolate with a V or an H
                 else
                     validSequence = false;
             }
 
-            if(k-i > 2)
-                interpolateSubList(list.subList(i, k));
+            if(k-i > 2){
+                interpolateSubList(list.subList(i, k+1));
+            }
 
             i++;
         }
     }
-
 
     /**
      * Check if a command is interpolatable
