@@ -160,7 +160,7 @@ public class VectAlignTest {
 
     @Test
     public void testRandomLinearInterpolateAligns() throws Exception {
-        testRandomAligns(VectAlign.Mode.LINEAR_INTERPOLATE);
+        testRandomAligns(VectAlign.Mode.LINEAR);
     }
 
     public void testRandomAligns(VectAlign.Mode mode) throws Exception {
