@@ -304,7 +304,10 @@ public class PathParser {
             for (int i = 0; i < nodeFrom.mParams.length; i++) {
                 mParams[i] = nodeFrom.mParams[i] * (1 - fraction)
                         + nodeTo.mParams[i] * fraction;
+
+                //System.out.print(mParams[i]+",");
             }
+            //System.out.println();
         }
 
     }
