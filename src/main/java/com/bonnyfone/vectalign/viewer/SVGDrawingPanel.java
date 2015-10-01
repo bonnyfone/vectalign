@@ -7,6 +7,8 @@ import com.kitfox.svg.app.beans.SVGIcon;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
 import java.io.*;
 import java.net.URI;
 import java.util.ArrayList;
@@ -14,20 +16,37 @@ import java.util.ArrayList;
 /**
  * Created by ziby on 20/09/15.
  */
-public class SVGDrawingPanel extends JPanel {
+public class SVGDrawingPanel extends JPanel implements ComponentListener {
 
+    private static String TRANSPARENT_COLOR = "none";
+
+    //SVG preview
     private SVGIcon svg;
     private Thread animator;
 
+    //Data
     private String startPath;
     private String endPath;
     private PathParser.PathDataNode[] startPathNode;
     private PathParser.PathDataNode[] endPathNode;
+    private float currentStep = 0.0f;
+
+    //Color, stroke
+    private String strokeColor;
+    private String fillColor;
+    private int strokeSize = 2;
+
+    private int width = 512;
+    private int height = 522;
+    private int viewBoxWidth = width;
+    private int viewBoxHeight = height;
 
 
     public SVGDrawingPanel() {
         super(true);
         svg = new SVGIcon();
+        svg.setScaleToFit(true);
+        addComponentListener(this);
     }
 
     @Override
@@ -41,6 +60,36 @@ public class SVGDrawingPanel extends JPanel {
         svg.paintIcon(this, g, 0, 0);
     }
 
+    @Override
+    public void componentResized(ComponentEvent e) {
+        System.out.println(e.getComponent().getSize());
+        adaptSizeWithoutStretch(e.getComponent().getSize());
+    }
+
+    private void adaptSizeWithoutStretch(Dimension newSize){
+        int newW = (int) newSize.getWidth();
+        int newH = (int) newSize.getHeight();
+
+        float ratio = ((float)width)/height;
+        float newRatio = ((float)newW)/newH;
+
+        if(newRatio > ratio)
+            newW = (int) (newH*ratio);
+        else
+            newH = (int) (newW/ratio);
+
+        svg.setPreferredSize(new Dimension(newW, newH));
+    }
+
+    @Override
+    public void componentMoved(ComponentEvent e) {}
+
+    @Override
+    public void componentShown(ComponentEvent e) {}
+
+    @Override
+    public void componentHidden(ComponentEvent e) {}
+
     public void setPaths(String start, String end){
         startPath = start;
         endPath = end;
@@ -49,28 +98,41 @@ public class SVGDrawingPanel extends JPanel {
     }
 
     public void renderStep(float step){
+        //Interpolate morphing
+        currentStep = step;
         ArrayList<PathParser.PathDataNode> interp = new ArrayList<>();
         interp.clear();
-        for(int i=0; i<startPathNode.length;i++){
-            PathParser.PathDataNode n = startPathNode[i];
+        PathParser.PathDataNode n;
+        for(int i=0; i<startPathNode.length; i++){
+            n = startPathNode[i];
             PathParser.PathDataNode newNode = new PathParser.PathDataNode(n.mType, new float[n.mParams.length]);
             newNode.interpolatePathDataNode(n, endPathNode[i], step);
             interp.add(newNode);
         }
+
+        //Rendering step using SVGSalamander...a bit tricky, need to be improved
         String svgFrame = makeDynamicSVG(PathNodeUtils.pathNodesToString(interp));
         StringReader reader = new StringReader(svgFrame);
-        final URI uri = SVGCache.getSVGUniverse().loadSVG(reader, "myImage"+step);
-        //System.out.println("Updating with step " + f);
+        URI uri = SVGCache.getSVGUniverse().loadSVG(reader, "svg_frame"+step);
         svg.setSvgURI(uri);
+
+        //refresh
         updateUI();
     }
 
-    public void startAnimation(){
+    public synchronized void toggleAnimation(){
+        if(animator != null && animator.isAlive())
+            stopAnimation();
+        else
+            startAnimation();
+    }
+
+    public synchronized void startAnimation(){
         animator = new Thread() {
             @Override
             public void run() {
                 try {
-                    float f=0;
+                    float f=currentStep;
                     int waitTime = 16;
                     float step = 0.005f;
                     while(!isInterrupted()){
@@ -93,8 +155,8 @@ public class SVGDrawingPanel extends JPanel {
     }
 
 
-    public void stopAnimation(){
-        if(animator != null & animator.isAlive())
+    public synchronized void stopAnimation(){
+        if(animator != null && animator.isAlive())
             animator.interrupt();
 
         animator = null;
@@ -106,7 +168,7 @@ public class SVGDrawingPanel extends JPanel {
 
         pw.println("<svg version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\"" +
                 "\t width=\"512px\" height=\"512px\" viewBox=\"0 0 512 512\" >\n" +
-                "\t\t<path stroke=\"red\" stroke-width=\"2\" d=\"" + data + "\"/>\n" + //TODO https://developer.mozilla.org/en-US/docs/Web/SVG/Tutorial/Fills_and_Strokes
+                "\t\t<path fill=\"" + getFillColor() + "\" stroke=\"" + getStrokeColor() + "\" stroke-width=\"" + getStrokeSize() + "\" d=\"" + data + "\"/>\n" + //TODO https://developer.mozilla.org/en-US/docs/Web/SVG/Tutorial/Fills_and_Strokes
                 "</svg>\n");
         pw.close();
         return sw.toString();
@@ -114,7 +176,70 @@ public class SVGDrawingPanel extends JPanel {
 
 
     public void close() {
-        if(animator != null && animator.isAlive())
-            animator.interrupt();
+        stopAnimation();
+    }
+
+
+
+    public String getStrokeColor(){
+        if(strokeColor != null)
+            return strokeColor;
+
+        return TRANSPARENT_COLOR;
+    }
+
+    public String getFillColor(){
+        if(fillColor != null)
+            return fillColor;
+
+        return TRANSPARENT_COLOR;
+    }
+
+    public int getStrokeSize(){
+        return strokeSize;
+    }
+
+    public void setStrokeSize(int size){
+        strokeSize = size;
+    }
+
+    public void setStrokeColor(String strokeColor) {
+        this.strokeColor = strokeColor;
+    }
+
+    public void setFillColor(String fillColor) {
+        this.fillColor = fillColor;
+    }
+
+    public int getSVGWidth() {
+        return width;
+    }
+
+    public void setSVGWidth(int width) {
+        this.width = width;
+    }
+
+    public int getSVGHeight() {
+        return height;
+    }
+
+    public void setSVGHeight(int height) {
+        this.height = height;
+    }
+
+    public int getSVGViewBoxWidth() {
+        return viewBoxWidth;
+    }
+
+    public void setSVGViewBoxWidth(int viewBoxWidth) {
+        this.viewBoxWidth = viewBoxWidth;
+    }
+
+    public int getSVGViewBoxHeight() {
+        return viewBoxHeight;
+    }
+
+    public void setSVGViewBoxHeight(int viewBoxHeight) {
+        this.viewBoxHeight = viewBoxHeight;
     }
 }
