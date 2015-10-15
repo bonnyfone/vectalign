@@ -1,39 +1,194 @@
 package com.bonnyfone.vectalign.viewer;
+
+import com.bonnyfone.vectalign.Main;
+import com.bonnyfone.vectalign.VectAlign;
+
+import javax.swing.*;
+import javax.swing.border.TitledBorder;
 import java.awt.*;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
+import java.awt.event.*;
 
 public class SVGViewer extends javax.swing.JFrame implements WindowListener {
     public static final long serialVersionUID = 273462773l;
 
-    private SVGDrawingPanel panel;
+    private int hgap = 0;
+    private int vgap = 0;
+
+    private SVGDrawingPanel[] svgs;
+
+    //Morphing
+    private JPanel panelMorphing;
+    private SVGDrawingPanel svgMorphing;
+
+    //Input SVGs
+    private JPanel panelInput;
+    private JPanel panelConfig;
+    private JButton btnEditFrom;
+    private JButton btnEditTo;
+    private JButton btnSvgFrom;
+    private JButton btnSvgTo;
+
+    //Controls
+    private JPanel panelControls;
+
+    //Output
+    private JPanel panelOutput;
+
+    private SVGDrawingPanel svgFrom;
+    private SVGDrawingPanel svgTo;
+    private BorderLayout mainLayout;
+
+    private String[] result;
 
     public SVGViewer() {
         initComponents();
+        addListeners();
         pack();
+        center();
 
         //FIXME show demo
         demo();
     }
 
-    private void demo(){
+    private void center(){
+        Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
+        this.setLocation(dim.width / 2 - this.getSize().width / 2, dim.height / 2 - this.getSize().height / 2);
+    }
+
+    private void demo() {
         String sampleA = "M 366.64407,65.08474 L 295.25723,225.79703 L 469.14417,252.02396 L 294.26984,270.55728 L 358.5001,434.26126 L 255.0126,292.0823 L 145.35594,429.55933 L 216.74277,268.84705 L 42.855843,242.62012 L 217.73016,224.08678 L 153.49991,60.38282 L 256.9874,202.56177 L 366.64407,65.08474";
         String sampleB = "M 91.09553,384.35547 L 91.09553,384.35547 L 109.221924,353.94055 L 127.34833,323.52557 L 145.47473,293.11063 L 163.60114,262.69568 L 181.72754,232.28073 L 199.85393,201.86578 L 217.98033,171.45084 L 236.10672,141.03589 L 254.23312,110.62095 L 405.71802,386.1926 L 91.09553,384.35547";
-        panel.setPaths(sampleA, sampleB);
-        panel.setStrokeColor("red");
-        panel.setFillColor("blue");
-        panel.setStrokeSize(5);
-        panel.renderStep(0.0f);
+
+        svgFrom.setPath(sampleA);
+        svgTo.setPath(sampleB);
+        svgMorphing.setPaths(sampleA, sampleB);
+
+        for (SVGDrawingPanel svgp : svgs) {
+            svgp.setStrokeColor("black");
+            svgp.setFillColor("white");
+            svgp.setStrokeSize(5);
+            svgp.renderStep(0.0f);
+        }
+    }
+
+    private String showInputDialog(String title, String defaultText){
+        JTextArea msg = new JTextArea(defaultText);
+        msg.setLineWrap(true);
+        msg.setWrapStyleWord(true);
+        JScrollPane scrollPane = new JScrollPane(msg);
+        scrollPane.setPreferredSize(new Dimension(600, 250));
+        scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+        int ris = JOptionPane.showConfirmDialog(null, scrollPane, title, JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+        if(ris == JOptionPane.OK_OPTION)
+            return msg.getText();
+        else
+            return defaultText;
+    }
+
+    private void reloadMorphing(){
+        try{
+            result = VectAlign.align(svgFrom.getPath(), svgTo.getPath(), VectAlign.Mode.BASE);
+            svgMorphing.setPaths(result[0], result[1]);
+            svgMorphing.redraw();
+        }
+        catch(Exception e){
+            e.printStackTrace();
+        }
     }
 
     private void initComponents() {
-        panel = new SVGDrawingPanel();
-        panel.addMouseListener(new MouseListener() {
+        //Title
+        setTitle(Main.NAME + " " + Main.VERSION);
+
+        //Input SVG
+        panelInput = new JPanel(new GridLayout(1, 2, 10, 0));
+        JPanel panelFrom = new JPanel(new BorderLayout());
+        JPanel panelTo = new JPanel(new BorderLayout());
+        svgFrom = new SVGDrawingPanel();
+        svgFrom.setPreferredSize(new Dimension(190, 200));
+        svgTo = new SVGDrawingPanel();
+        svgTo.setPreferredSize(new Dimension(190, 200));
+
+        btnEditFrom = new JButton("Edit Path");
+        btnEditTo = new JButton("Edit Path");
+        btnSvgFrom = new JButton("Load SVG");
+        btnSvgTo = new JButton("Load SVG");
+
+        JPanel panelBtnFrom = new JPanel();
+        JPanel panelBtnTo = new JPanel();
+        panelBtnFrom.setLayout(new GridLayout(1, 2));
+        panelBtnTo.setLayout(new GridLayout(1, 2));
+        panelBtnFrom.add(btnEditFrom);
+        panelBtnFrom.add(btnSvgFrom);
+        panelBtnTo.add(btnEditTo);
+        panelBtnTo.add(btnSvgTo);
+
+        panelFrom.add(svgFrom, BorderLayout.CENTER);
+        panelFrom.add(panelBtnFrom, BorderLayout.SOUTH);
+        panelFrom.setBorder(new TitledBorder("Starting SVG/VD"));
+
+        panelTo.add(svgTo, BorderLayout.CENTER);
+        panelTo.add(panelBtnTo, BorderLayout.SOUTH);
+        panelTo.setBorder(new TitledBorder("Ending SVG/VD"));
+
+        //Controls
+        panelControls = new JPanel(new BorderLayout(hgap, vgap));
+        panelControls.setPreferredSize(new Dimension(400, 200));
+        panelControls.setBorder(new TitledBorder("Configure morphing"));
+
+        panelInput.add(panelFrom);
+        panelInput.add(panelTo);
+
+        panelConfig = new JPanel(new GridLayout(2, 1, 0, 10));
+        panelConfig.add(panelInput);
+        panelConfig.add(panelControls);
+
+        //Morphing
+        svgMorphing = new SVGDrawingPanel();
+        svgMorphing.setPreferredSize(new Dimension(400, 400));
+        panelMorphing = new JPanel(new BorderLayout(hgap, vgap));
+        panelMorphing.add(svgMorphing, BorderLayout.CENTER);
+        panelMorphing.setBorder(BorderFactory.createTitledBorder("Morphing preview"));
+
+        //Output
+        panelOutput = new JPanel();
+        panelOutput.setBorder(new TitledBorder("Results (aligned path sequences)"));
+        panelOutput.setPreferredSize(new Dimension(800, 250));
+
+        mainLayout = new BorderLayout(hgap, vgap);
+        setLayout(mainLayout);
+        getContentPane().add(panelConfig, BorderLayout.WEST);
+        getContentPane().add(panelMorphing, BorderLayout.EAST);
+        getContentPane().add(panelOutput, BorderLayout.SOUTH);
+        setPreferredSize(new Dimension(900, 650));
+        setBackground(Color.white);
+
+        svgs = new SVGDrawingPanel[]{svgFrom, svgTo, svgMorphing};
+    }
+
+    private void addListeners() {
+        btnEditFrom.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                svgFrom.setPath(showInputDialog("Edit STARTING path", svgFrom.getPath()));
+                svgFrom.redraw();
+                reloadMorphing();
+            }
+        });
+
+        btnEditTo.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                svgTo.setPath(showInputDialog("Edit ENDING path", svgTo.getPath()));
+                svgTo.redraw();
+                reloadMorphing();
+            }
+        });
+
+        svgMorphing.addMouseListener(new MouseListener() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                panel.toggleAnimation();
+                svgMorphing.toggleAnimation();
             }
 
             @Override
@@ -54,11 +209,7 @@ public class SVGViewer extends javax.swing.JFrame implements WindowListener {
             }
         });
 
-        setLayout(new java.awt.BorderLayout());
-        this.getContentPane().add(panel, BorderLayout.CENTER);
-        setPreferredSize(new Dimension(200, 220));
-
-        setBackground(Color.white);
+        //Window
         addWindowListener(this);
     }
 
@@ -69,7 +220,7 @@ public class SVGViewer extends javax.swing.JFrame implements WindowListener {
 
     @Override
     public void windowClosing(WindowEvent e) {
-        panel.close();
+        svgMorphing.close();
         dispose();
         System.out.println("Exiting...");
     }
@@ -99,7 +250,14 @@ public class SVGViewer extends javax.swing.JFrame implements WindowListener {
 
     }
 
+    //MAIN
     public static void main(String args[]) {
+        //Apply Nimbus LaF if possible
+        try {
+            UIManager.setLookAndFeel("com.sun.java.swing.plaf.nimbus.NimbusLookAndFeel");
+        }
+        catch(Exception e){}
+
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
                 new SVGViewer().setVisible(true);

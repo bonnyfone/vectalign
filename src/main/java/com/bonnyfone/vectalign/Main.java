@@ -20,8 +20,8 @@ public class Main {
     private static final String OPTION_MODE = "m";
 
     //Application infos
-    private static final String VERSION = "0.2";
-    private static final String NAME = "VectAlign";
+    public static final String VERSION = "0.2";
+    public static final String NAME = "VectAlign";
 
 
     /**

@@ -41,6 +41,7 @@ public class SVGDrawingPanel extends JPanel implements ComponentListener {
     private int viewBoxWidth = width;
     private int viewBoxHeight = height;
 
+    private long frameSeed;
 
     public SVGDrawingPanel() {
         super(true);
@@ -51,7 +52,11 @@ public class SVGDrawingPanel extends JPanel implements ComponentListener {
 
     @Override
     public void paintComponent(Graphics g) {
-        super.paintComponent(g);
+        try{
+            super.paintComponent(g);
+        }
+        catch (Exception e){}
+
         final int width = getWidth();
         final int height = getHeight();
         g.setColor(getBackground());
@@ -91,29 +96,50 @@ public class SVGDrawingPanel extends JPanel implements ComponentListener {
     public void componentHidden(ComponentEvent e) {}
 
     public void setPaths(String start, String end){
-        startPath = start;
-        endPath = end;
-        startPathNode = PathParser.createNodesFromPathData(startPath);
-        endPathNode = PathParser.createNodesFromPathData(endPath);
+        setupPaths(start, end);
+    }
+
+    public void setPath(String path){
+        setupPaths(path, null);
+    }
+
+    private void setupPaths(String start, String end){
+        frameSeed = System.currentTimeMillis();
+        if(start != null){
+            startPath = start;
+            startPathNode = PathParser.createNodesFromPathData(startPath);
+        }
+        if(end != null){
+            endPath = end;
+            endPathNode = PathParser.createNodesFromPathData(endPath);
+        }
+    }
+
+    public void redraw(){
+        renderStep(currentStep);
     }
 
     public void renderStep(float step){
         //Interpolate morphing
         currentStep = step;
-        ArrayList<PathParser.PathDataNode> interp = new ArrayList<>();
-        interp.clear();
-        PathParser.PathDataNode n;
-        for(int i=0; i<startPathNode.length; i++){
-            n = startPathNode[i];
-            PathParser.PathDataNode newNode = new PathParser.PathDataNode(n.mType, new float[n.mParams.length]);
-            newNode.interpolatePathDataNode(n, endPathNode[i], step);
-            interp.add(newNode);
+        String svgFrame = null;
+        if(endPathNode != null){
+            ArrayList<PathParser.PathDataNode> interp = new ArrayList<>();
+            PathParser.PathDataNode n;
+            for(int i=0; i<startPathNode.length; i++){
+                n = startPathNode[i];
+                PathParser.PathDataNode newNode = new PathParser.PathDataNode(n.mType, new float[n.mParams.length]);
+                newNode.interpolatePathDataNode(n, endPathNode[i], step);
+                interp.add(newNode);
+            }
+            svgFrame = makeDynamicSVG(PathNodeUtils.pathNodesToString(interp));
+        }else{
+            svgFrame = makeDynamicSVG(startPath);
         }
 
         //Rendering step using SVGSalamander...a bit tricky, need to be improved
-        String svgFrame = makeDynamicSVG(PathNodeUtils.pathNodesToString(interp));
         StringReader reader = new StringReader(svgFrame);
-        URI uri = SVGCache.getSVGUniverse().loadSVG(reader, "svg_frame"+step);
+        URI uri = SVGCache.getSVGUniverse().loadSVG(reader, frameSeed + "_" + this.hashCode() + "_svg_frame"+step);
         svg.setSvgURI(uri);
 
         //refresh
@@ -209,6 +235,10 @@ public class SVGDrawingPanel extends JPanel implements ComponentListener {
 
     public void setFillColor(String fillColor) {
         this.fillColor = fillColor;
+    }
+
+    public String getPath(){
+        return startPath;
     }
 
     public int getSVGWidth() {
