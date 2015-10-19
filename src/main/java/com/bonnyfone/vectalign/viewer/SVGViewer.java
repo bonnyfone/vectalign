@@ -1,12 +1,16 @@
 package com.bonnyfone.vectalign.viewer;
 
 import com.bonnyfone.vectalign.Main;
+import com.bonnyfone.vectalign.SVGParser;
+import com.bonnyfone.vectalign.Utils;
 import com.bonnyfone.vectalign.VectAlign;
 
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
+import javax.swing.filechooser.FileFilter;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.File;
 
 public class SVGViewer extends javax.swing.JFrame implements WindowListener {
     public static final long serialVersionUID = 273462773l;
@@ -69,6 +73,41 @@ public class SVGViewer extends javax.swing.JFrame implements WindowListener {
             svgp.setStrokeSize(5);
             svgp.renderStep(0.0f);
         }
+    }
+
+    private File showOpenFile(String title){
+        final JFileChooser fc = new JFileChooser();
+        fc.setDialogTitle(title);
+        fc.setFileFilter(new FileFilter() {
+            @Override
+            public boolean accept(File f) {
+                if (f.isDirectory())
+                    return true;
+
+                String extension = Utils.getExtension(f);
+                if (extension != null) {
+                    if (extension.equals("svg"))
+                        return true;
+                     else
+                        return false;
+                }
+
+                return false;
+            }
+
+            @Override
+            public String getDescription() {
+                return "SVG images";
+            }
+
+        });
+
+        int returnVal = fc.showOpenDialog(null);
+        File file = null;
+        if(returnVal == JFileChooser.APPROVE_OPTION)
+            file = fc.getSelectedFile();
+
+        return file;
     }
 
     private String showInputDialog(String title, String defaultText){
@@ -166,7 +205,30 @@ public class SVGViewer extends javax.swing.JFrame implements WindowListener {
         svgs = new SVGDrawingPanel[]{svgFrom, svgTo, svgMorphing};
     }
 
+    private void handleSVGLoad(File f, SVGDrawingPanel svg){
+        if(SVGParser.isSVGImage(f)) {
+            svg.setPath(SVGParser.getPathDataFromSVGFile(f));
+            svg.redraw();
+            reloadMorphing();
+        } else
+            System.out.println("Error: not a valid SVG");
+    }
+
     private void addListeners() {
+        btnSvgFrom.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                handleSVGLoad(showOpenFile("Load SVG"), svgFrom);
+            }
+        });
+
+        btnSvgTo.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                handleSVGLoad(showOpenFile("Load SVG"), svgTo);
+            }
+        });
+
         btnEditFrom.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
