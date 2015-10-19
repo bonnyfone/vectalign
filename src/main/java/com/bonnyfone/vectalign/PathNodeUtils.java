@@ -309,4 +309,42 @@ public class PathNodeUtils {
     public static String pathNodesToString(ArrayList<PathParser.PathDataNode> nodes){
         return pathNodesToString(nodes, false);
     }
+
+
+    /**
+     * Return the max X,Y values
+     * @param nodes
+     * @return
+     */
+    public static float[] getMaxValues(PathParser.PathDataNode[] nodes){
+        if(nodes == null)
+            return null;
+
+        ArrayList<PathParser.PathDataNode> nodeAsList = new ArrayList<>();
+        nodeAsList.addAll(Arrays.asList(nodes));
+        return getMaxValues(nodeAsList);
+    }
+
+    /**
+     * Return the max X,Y values
+     * @param nodes
+     * @return
+     */
+    public static float[] getMaxValues(ArrayList<PathParser.PathDataNode> nodes){
+        if(nodes == null)
+            return null;
+
+        float[][] penPos = calculatePenPosition(nodes);
+
+        float ris[] = new float[]{0, 0};
+        for(float pen[] : penPos){
+            if(pen[0] > ris[0])
+                ris[0] = pen[0];
+
+            if(pen[1] > ris[1])
+                ris[1] = pen[1];
+        }
+        return ris;
+    }
+
 }

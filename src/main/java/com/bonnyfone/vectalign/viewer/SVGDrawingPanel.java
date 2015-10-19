@@ -40,6 +40,7 @@ public class SVGDrawingPanel extends JPanel implements ComponentListener {
     private int height = 522;
     private int viewBoxWidth = width;
     private int viewBoxHeight = height;
+    private float courtesyScaleUp = 1.1f;
 
     private long frameSeed;
 
@@ -113,6 +114,24 @@ public class SVGDrawingPanel extends JPanel implements ComponentListener {
             endPath = end;
             endPathNode = PathParser.createNodesFromPathData(endPath);
         }
+
+        //adapt svg size and viewport
+        float maxX = 0;
+        float maxY = 0;
+        float maxValuesStartPath[] = PathNodeUtils.getMaxValues(startPathNode);
+        float maxValuesEndPath[] = PathNodeUtils.getMaxValues(endPathNode);
+        if(maxValuesStartPath != null){
+            maxX = Math.max(maxValuesStartPath[0], maxX);
+            maxY = Math.max(maxValuesStartPath[1], maxX);
+        }
+        if(maxValuesEndPath != null){
+            maxX = Math.max(maxValuesEndPath[0], maxX);
+            maxY = Math.max(maxValuesEndPath[1], maxX);
+        }
+
+        viewBoxWidth = (int) (courtesyScaleUp * maxX);
+        viewBoxHeight = (int) (courtesyScaleUp * maxY);
+        System.out.println("SVG Viewport: " +viewBoxWidth + " x "+viewBoxHeight);
     }
 
     public void redraw(){
@@ -193,7 +212,7 @@ public class SVGDrawingPanel extends JPanel implements ComponentListener {
         PrintWriter pw = new PrintWriter(sw);
 
         pw.println("<svg version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\"" +
-                "\t width=\"512px\" height=\"512px\" viewBox=\"0 0 512 512\" >\n" +
+                "\t width=\"" + width + "px\" height=\"" + height + "px\" viewBox=\"0 0 " + viewBoxWidth + " " + viewBoxHeight + "\" >\n" +
                 "\t\t<path fill=\"" + getFillColor() + "\" stroke=\"" + getStrokeColor() + "\" stroke-width=\"" + getStrokeSize() + "\" d=\"" + data + "\"/>\n" + //TODO https://developer.mozilla.org/en-US/docs/Web/SVG/Tutorial/Fills_and_Strokes
                 "</svg>\n");
         pw.close();
