@@ -122,15 +122,19 @@ public class SVGDrawingPanel extends JPanel implements ComponentListener {
         float maxValuesEndPath[] = PathNodeUtils.getMaxValues(endPathNode);
         if(maxValuesStartPath != null){
             maxX = Math.max(maxValuesStartPath[0], maxX);
-            maxY = Math.max(maxValuesStartPath[1], maxX);
+            maxY = Math.max(maxValuesStartPath[1], maxY);
         }
         if(maxValuesEndPath != null){
             maxX = Math.max(maxValuesEndPath[0], maxX);
-            maxY = Math.max(maxValuesEndPath[1], maxX);
+            maxY = Math.max(maxValuesEndPath[1], maxY);
         }
 
-        viewBoxWidth = (int) (courtesyScaleUp * maxX);
-        viewBoxHeight = (int) (courtesyScaleUp * maxY);
+        //FIXME for now, we keep a squared aspect ratio
+        int newViewBox = (int) (courtesyScaleUp * Math.max(maxX, maxY));
+
+        viewBoxWidth = newViewBox;
+        viewBoxHeight = newViewBox;
+
         System.out.println("SVG Viewport: " +viewBoxWidth + " x "+viewBoxHeight);
     }
 
