@@ -5,7 +5,6 @@ import com.bonnyfone.vectalign.PathNodeUtils;
 import com.kitfox.svg.SVGCache;
 import com.kitfox.svg.app.beans.SVGIcon;
 
-import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
@@ -16,9 +15,9 @@ import java.util.ArrayList;
 /**
  * Created by ziby on 20/09/15.
  */
-public class SVGDrawingPanel extends JPanel implements ComponentListener {
+public class SVGDrawingPanel extends RoundedJPanel implements ComponentListener {
 
-    private static String TRANSPARENT_COLOR = "none";
+    public static String TRANSPARENT_COLOR = "none";
 
     //SVG preview
     private SVGIcon svg;
@@ -40,12 +39,14 @@ public class SVGDrawingPanel extends JPanel implements ComponentListener {
     private int height = 522;
     private int viewBoxWidth = width;
     private int viewBoxHeight = height;
-    private float courtesyScaleUp = 1.1f;
+    private float courtesyNegativeSlop = -0.05f;
+    private float courtesyScaleUp = 1.2f;
+    private int viewBoxNegativeSlop = (int) (courtesyNegativeSlop * viewBoxWidth);
 
     private long frameSeed;
 
     public SVGDrawingPanel() {
-        super(true);
+        super();
         svg = new SVGIcon();
         svg.setScaleToFit(true);
         addComponentListener(this);
@@ -61,7 +62,8 @@ public class SVGDrawingPanel extends JPanel implements ComponentListener {
         final int width = getWidth();
         final int height = getHeight();
         g.setColor(getBackground());
-        g.fillRect(0, 0, width, height);
+        //g.fillRect(0, 0, width, height);
+
         svg.setAntiAlias(true);
         svg.paintIcon(this, g, 0, 0);
     }
@@ -134,6 +136,7 @@ public class SVGDrawingPanel extends JPanel implements ComponentListener {
 
         viewBoxWidth = newViewBox;
         viewBoxHeight = newViewBox;
+        viewBoxNegativeSlop = (int) (courtesyNegativeSlop * newViewBox);
 
         System.out.println("SVG Viewport: " +viewBoxWidth + " x "+viewBoxHeight);
     }
@@ -216,19 +219,16 @@ public class SVGDrawingPanel extends JPanel implements ComponentListener {
         PrintWriter pw = new PrintWriter(sw);
 
         pw.println("<svg version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\"" +
-                "\t width=\"" + width + "px\" height=\"" + height + "px\" viewBox=\"0 0 " + viewBoxWidth + " " + viewBoxHeight + "\" >\n" +
+                "\t width=\"" + width + "px\" height=\"" + height + "px\" viewBox=\"" + viewBoxNegativeSlop*3 + " " + viewBoxNegativeSlop + " "+ viewBoxWidth + " " + viewBoxHeight + "\" >\n" +
                 "\t\t<path fill=\"" + getFillColor() + "\" stroke=\"" + getStrokeColor() + "\" stroke-width=\"" + getStrokeSize() + "\" d=\"" + data + "\"/>\n" + //TODO https://developer.mozilla.org/en-US/docs/Web/SVG/Tutorial/Fills_and_Strokes
                 "</svg>\n");
         pw.close();
         return sw.toString();
     }
 
-
     public void close() {
         stopAnimation();
     }
-
-
 
     public String getStrokeColor(){
         if(strokeColor != null)

@@ -17,6 +17,11 @@ public class SVGViewer extends javax.swing.JFrame implements WindowListener {
 
     private int hgap = 0;
     private int vgap = 0;
+    private Color svgPanelBackgroundColor = Color.WHITE;
+    private String defaultSvgStrokeColor = "black";
+    private String defaultSvgFillColor = SVGDrawingPanel.TRANSPARENT_COLOR;
+    private int defaultStrokeSize = 3;
+
 
     private SVGDrawingPanel[] svgs;
 
@@ -68,9 +73,6 @@ public class SVGViewer extends javax.swing.JFrame implements WindowListener {
         svgMorphing.setPaths(sampleA, sampleB);
 
         for (SVGDrawingPanel svgp : svgs) {
-            svgp.setStrokeColor("black");
-            svgp.setFillColor("white");
-            svgp.setStrokeSize(5);
             svgp.renderStep(0.0f);
         }
     }
@@ -203,6 +205,13 @@ public class SVGViewer extends javax.swing.JFrame implements WindowListener {
         setBackground(Color.white);
 
         svgs = new SVGDrawingPanel[]{svgFrom, svgTo, svgMorphing};
+
+        for (SVGDrawingPanel svgp : svgs) {
+            svgp.setBackground(svgPanelBackgroundColor);
+            svgp.setStrokeColor(defaultSvgStrokeColor);
+            svgp.setFillColor(defaultSvgFillColor);
+            svgp.setStrokeSize(defaultStrokeSize);
+        }
     }
 
     private void handleSVGLoad(File f, SVGDrawingPanel svg){
