@@ -185,14 +185,16 @@ public class SVGDrawingPanel extends RoundedJPanel implements ComponentListener 
             public void run() {
                 try {
                     float f=currentStep;
-                    int waitTime = 16;
+                    int baseWaitTime = 16;
+                    int longWaitTime = 256;
                     float step = 0.005f;
                     while(!isInterrupted()){
                         renderStep(f);
-                        sleep(waitTime);
+                        sleep(f <= 0 || f >= 1 ? longWaitTime : baseWaitTime);
                         f+=step;
-                        if(f>1 || f < 0)
+                        if(f > 1 || f < 0){
                             step = -step;
+                        }
                     }
 
                 } catch (InterruptedException e) {
