@@ -7,6 +7,8 @@ import com.bonnyfone.vectalign.VectAlign;
 
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.filechooser.FileFilter;
 import java.awt.*;
 import java.awt.event.*;
@@ -17,16 +19,20 @@ public class SVGViewer extends javax.swing.JFrame implements WindowListener {
 
     private int hgap = 0;
     private int vgap = 0;
+    private int btnIconSize = 23;
     private Color svgPanelBackgroundColor = Color.WHITE;
     private String defaultSvgStrokeColor = "black";
     private String defaultSvgFillColor = SVGDrawingPanel.TRANSPARENT_COLOR;
     private int defaultStrokeSize = 3;
 
-
     private SVGDrawingPanel[] svgs;
 
     //Morphing
     private JPanel panelMorphing;
+    private JSlider sliderMorphing;
+    private JButton btnMorphAnimation;
+    private ImageIcon icnPlay;
+    private ImageIcon icnPause;
     private SVGDrawingPanel svgMorphing;
 
     //Input SVGs
@@ -50,6 +56,7 @@ public class SVGViewer extends javax.swing.JFrame implements WindowListener {
     private String[] result;
 
     public SVGViewer() {
+        initIcons();
         initComponents();
         addListeners();
         pack();
@@ -57,6 +64,11 @@ public class SVGViewer extends javax.swing.JFrame implements WindowListener {
 
         //FIXME show demo
         demo();
+    }
+
+    private void initIcons() {
+        icnPlay = new ImageIcon((new ImageIcon(this.getClass().getResource("/icn_play.png")).getImage().getScaledInstance(btnIconSize, btnIconSize, java.awt.Image.SCALE_SMOOTH)));
+        icnPause = new ImageIcon((new ImageIcon(this.getClass().getResource("/icn_pause.png")).getImage().getScaledInstance(btnIconSize, btnIconSize, java.awt.Image.SCALE_SMOOTH)));
     }
 
     private void center(){
@@ -90,7 +102,7 @@ public class SVGViewer extends javax.swing.JFrame implements WindowListener {
                 if (extension != null) {
                     if (extension.equals("svg"))
                         return true;
-                     else
+                    else
                         return false;
                 }
 
@@ -188,8 +200,21 @@ public class SVGViewer extends javax.swing.JFrame implements WindowListener {
         //Morphing
         svgMorphing = new SVGDrawingPanel();
         svgMorphing.setPreferredSize(new Dimension(400, 400));
+        sliderMorphing = new JSlider(JSlider.HORIZONTAL, 0, 1000, 0);
+        sliderMorphing.setPreferredSize(new Dimension(350, 25));
+        btnMorphAnimation = new JButton(icnPlay);
+        btnMorphAnimation.setPreferredSize(new Dimension(35,35));
+        btnMorphAnimation.setBorderPainted(false);
+        btnMorphAnimation.setBorder(null);
+        btnMorphAnimation.setMargin(new Insets(0, 0, 0, 0));
+        btnMorphAnimation.setContentAreaFilled(false);
+
+        JPanel bottomMorphing = new JPanel(new FlowLayout());
+        bottomMorphing.add(btnMorphAnimation);
+        bottomMorphing.add(sliderMorphing);
         panelMorphing = new JPanel(new BorderLayout(hgap, vgap));
         panelMorphing.add(svgMorphing, BorderLayout.CENTER);
+        panelMorphing.add(bottomMorphing, BorderLayout.SOUTH);
         panelMorphing.setBorder(BorderFactory.createTitledBorder("Morphing preview"));
 
         //Output
@@ -225,6 +250,20 @@ public class SVGViewer extends javax.swing.JFrame implements WindowListener {
     }
 
     private void addListeners() {
+        sliderMorphing.addChangeListener(new ChangeListener() {
+            @Override
+            public void stateChanged(ChangeEvent e) {
+                svgMorphing.renderStep(((float)sliderMorphing.getValue())/1000.f);
+            }
+        });
+
+        btnMorphAnimation.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                handleToggleAnimation();
+            }
+        });
+
         btnSvgFrom.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -260,7 +299,7 @@ public class SVGViewer extends javax.swing.JFrame implements WindowListener {
         svgMorphing.addMouseListener(new MouseListener() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                svgMorphing.toggleAnimation();
+                handleToggleAnimation();
             }
 
             @Override
@@ -283,6 +322,19 @@ public class SVGViewer extends javax.swing.JFrame implements WindowListener {
 
         //Window
         addWindowListener(this);
+    }
+
+    private void handleToggleAnimation(){
+        svgMorphing.toggleAnimation();
+        if(svgMorphing.isAnimating()){
+            btnMorphAnimation.setIcon(icnPause);
+            sliderMorphing.setEnabled(false);
+        }
+        else{
+            btnMorphAnimation.setIcon(icnPlay);
+            sliderMorphing.setEnabled(true);
+            sliderMorphing.setValue((int) (svgMorphing.getCurrentStep()*sliderMorphing.getMaximum()));
+        }
     }
 
     @Override

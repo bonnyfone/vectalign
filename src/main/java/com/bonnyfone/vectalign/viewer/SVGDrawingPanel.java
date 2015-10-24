@@ -184,6 +184,14 @@ public class SVGDrawingPanel extends RoundedJPanel implements ComponentListener 
             startAnimation();
     }
 
+    public boolean isAnimating(){
+        return (animator != null && animator.isAlive());
+    }
+
+    public float getCurrentStep(){
+        return currentStep;
+    }
+
     public synchronized void startAnimation(){
         animator = new Thread() {
             @Override
