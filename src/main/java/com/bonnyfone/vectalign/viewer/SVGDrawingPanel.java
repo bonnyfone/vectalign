@@ -145,6 +145,11 @@ public class SVGDrawingPanel extends RoundedJPanel implements ComponentListener 
         renderStep(currentStep);
     }
 
+    public void reset(){
+        currentStep = 0;
+        redraw();
+    }
+
     public void renderStep(float step){
         //Interpolate morphing
         currentStep = step;
@@ -184,6 +189,11 @@ public class SVGDrawingPanel extends RoundedJPanel implements ComponentListener 
             @Override
             public void run() {
                 try {
+                    if(currentStep>1)
+                        currentStep = 1;
+                    else if(currentStep < 0)
+                        currentStep = 0;
+
                     float f=currentStep;
                     int baseWaitTime = 16;
                     int longWaitTime = 256;

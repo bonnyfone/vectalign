@@ -129,8 +129,9 @@ public class SVGViewer extends javax.swing.JFrame implements WindowListener {
     private void reloadMorphing(){
         try{
             result = VectAlign.align(svgFrom.getPath(), svgTo.getPath(), VectAlign.Mode.BASE);
+            svgMorphing.stopAnimation();
             svgMorphing.setPaths(result[0], result[1]);
-            svgMorphing.redraw();
+            svgMorphing.reset();
         }
         catch(Exception e){
             e.printStackTrace();
