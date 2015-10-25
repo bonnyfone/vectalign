@@ -19,6 +19,8 @@ public class SVGDrawingPanel extends RoundedJPanel implements ComponentListener 
 
     public static String TRANSPARENT_COLOR = "none";
 
+    private SVGDrawingPanelListener listener;
+
     //SVG preview
     private SVGIcon svg;
     private Thread animator;
@@ -173,6 +175,9 @@ public class SVGDrawingPanel extends RoundedJPanel implements ComponentListener 
         URI uri = SVGCache.getSVGUniverse().loadSVG(reader, frameSeed + "_" + this.hashCode() + "_svg_frame"+step);
         svg.setSvgURI(uri);
 
+        if(getListener() != null)
+            getListener().onMorphingChanges(currentStep);
+
         //refresh
         updateUI();
     }
@@ -314,5 +319,13 @@ public class SVGDrawingPanel extends RoundedJPanel implements ComponentListener 
 
     public void setSVGViewBoxHeight(int viewBoxHeight) {
         this.viewBoxHeight = viewBoxHeight;
+    }
+
+    public SVGDrawingPanelListener getListener() {
+        return listener;
+    }
+
+    public void setListener(SVGDrawingPanelListener listener) {
+        this.listener = listener;
     }
 }
