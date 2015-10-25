@@ -34,6 +34,7 @@ public class SVGViewer extends javax.swing.JFrame implements WindowListener, SVG
     private JButton btnMorphAnimation;
     private ImageIcon icnPlay;
     private ImageIcon icnPause;
+    private ImageIcon icnCopy;
     private SVGDrawingPanel svgMorphing;
 
     //Input SVGs
@@ -49,6 +50,11 @@ public class SVGViewer extends javax.swing.JFrame implements WindowListener, SVG
 
     //Output
     private JPanel panelOutput;
+    private JTextArea svgFromOutput;
+    private JTextArea svgToOutput;
+    private JButton btnCopyFrom;
+    private JButton btnCopyTo;
+
 
     private SVGDrawingPanel svgFrom;
     private SVGDrawingPanel svgTo;
@@ -70,6 +76,7 @@ public class SVGViewer extends javax.swing.JFrame implements WindowListener, SVG
     private void initIcons() {
         icnPlay = new ImageIcon((new ImageIcon(this.getClass().getResource("/icn_play.png")).getImage().getScaledInstance(btnIconSize, btnIconSize, java.awt.Image.SCALE_SMOOTH)));
         icnPause = new ImageIcon((new ImageIcon(this.getClass().getResource("/icn_pause.png")).getImage().getScaledInstance(btnIconSize, btnIconSize, java.awt.Image.SCALE_SMOOTH)));
+        icnCopy = new ImageIcon((new ImageIcon(this.getClass().getResource("/icn_copy.png")).getImage().getScaledInstance(btnIconSize, btnIconSize, java.awt.Image.SCALE_SMOOTH)));
     }
 
     private void center(){
@@ -83,7 +90,7 @@ public class SVGViewer extends javax.swing.JFrame implements WindowListener, SVG
 
         svgFrom.setPath(sampleA);
         svgTo.setPath(sampleB);
-        svgMorphing.setPaths(sampleA, sampleB);
+        reloadMorphing();
 
         for (SVGDrawingPanel svgp : svgs) {
             svgp.renderStep(0.0f);
@@ -145,6 +152,10 @@ public class SVGViewer extends javax.swing.JFrame implements WindowListener, SVG
             svgMorphing.stopAnimation();
             svgMorphing.setPaths(result[0], result[1]);
             svgMorphing.reset();
+
+            svgFromOutput.setText(result[0]);
+            svgToOutput.setText(result[1]);
+
             updateMorphingControls();
         }
         catch(Exception e){
@@ -153,6 +164,8 @@ public class SVGViewer extends javax.swing.JFrame implements WindowListener, SVG
     }
 
     private void initComponents() {
+        ToolTipManager.sharedInstance().setInitialDelay(400);
+
         //Title
         setTitle(Main.NAME + " " + Main.VERSION);
 
@@ -206,7 +219,7 @@ public class SVGViewer extends javax.swing.JFrame implements WindowListener, SVG
         sliderMorphing = new JSlider(JSlider.HORIZONTAL, 0, 1000, 0);
         sliderMorphing.setPreferredSize(new Dimension(350, 25));
         btnMorphAnimation = new JButton(icnPlay);
-        btnMorphAnimation.setPreferredSize(new Dimension(35,35));
+        btnMorphAnimation.setPreferredSize(new Dimension(35, 35));
         btnMorphAnimation.setBorderPainted(false);
         btnMorphAnimation.setBorder(null);
         btnMorphAnimation.setMargin(new Insets(0, 0, 0, 0));
@@ -218,12 +231,53 @@ public class SVGViewer extends javax.swing.JFrame implements WindowListener, SVG
         panelMorphing = new JPanel(new BorderLayout(hgap, vgap));
         panelMorphing.add(svgMorphing, BorderLayout.CENTER);
         panelMorphing.add(bottomMorphing, BorderLayout.SOUTH);
-        panelMorphing.setBorder(BorderFactory.createTitledBorder("Morphing preview"));
+        panelMorphing.setBorder(BorderFactory.createTitledBorder("AnimatedVectorDrawable (preview)"));
 
         //Output
         panelOutput = new JPanel();
         panelOutput.setBorder(new TitledBorder("Results (aligned path sequences)"));
-        panelOutput.setPreferredSize(new Dimension(800, 250));
+        panelOutput.setLayout(new GridBagLayout());
+        GridBagConstraints gc1 = new GridBagConstraints();
+        gc1.fill = GridBagConstraints.BOTH;
+        gc1.gridx = 0;
+        gc1.gridy = 0;
+        gc1.weightx = 0.975f;
+        gc1.weighty = 0.5f;
+        GridBagConstraints gcBtn1 = new GridBagConstraints();
+        gcBtn1.fill = GridBagConstraints.BOTH;
+        gcBtn1.gridx = 1;
+        gcBtn1.gridy = 0;
+        gcBtn1.weightx = 0.025f;
+        gcBtn1.weighty = 0.5f;
+        GridBagConstraints gc2 = new GridBagConstraints();
+        gc2.fill = GridBagConstraints.BOTH;
+        gc2.gridx = 0;
+        gc2.gridy = 1;
+        gc2.weightx = 0.975f;
+        gc2.weighty = 0.5f;
+        GridBagConstraints gcBtn2 = new GridBagConstraints();
+        gcBtn2.fill = GridBagConstraints.BOTH;
+        gcBtn2.gridx = 1;
+        gcBtn2.gridy = 1;
+        gcBtn2.weightx = 0.025f;
+        gcBtn2.weighty = 0.5f;
+
+        svgFromOutput = new JTextArea();
+        svgFromOutput.setEditable(false);
+        svgToOutput = new JTextArea();
+        svgToOutput.setEditable(false);
+        JScrollPane scroll1 = new JScrollPane(svgFromOutput);
+        scroll1.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
+        JScrollPane scroll2 = new JScrollPane(svgToOutput);
+        scroll2.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
+        btnCopyFrom = new JButton(icnCopy);
+        btnCopyFrom.setToolTipText("Copy aligned STARTING path to clipboard");
+        btnCopyTo = new JButton(icnCopy);
+        btnCopyTo.setToolTipText("Copy aligned ENDING path to clipboard");
+        panelOutput.add(scroll1, gc1);
+        panelOutput.add(btnCopyFrom, gcBtn1);
+        panelOutput.add(scroll2, gc2);
+        panelOutput.add(btnCopyTo, gcBtn2);
 
         mainLayout = new BorderLayout(hgap, vgap);
         setLayout(mainLayout);
@@ -253,6 +307,22 @@ public class SVGViewer extends javax.swing.JFrame implements WindowListener, SVG
     }
 
     private void addListeners() {
+        btnCopyFrom.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                Utils.copyToClipboard(svgFromOutput.getText());
+                svgFromOutput.select(0, svgFromOutput.getText().length());
+            }
+        });
+
+        btnCopyTo.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                Utils.copyToClipboard(svgToOutput.getText());
+                svgToOutput.select(0, svgToOutput.getText().length());
+            }
+        });
+
         sliderMorphing.addChangeListener(new ChangeListener() {
             @Override
             public void stateChanged(ChangeEvent e) {
@@ -337,12 +407,12 @@ public class SVGViewer extends javax.swing.JFrame implements WindowListener, SVG
     private void updateMorphingControls(){
         if(svgMorphing.isAnimating()){
             btnMorphAnimation.setIcon(icnPause);
-            sliderMorphing.setValue((int) (svgMorphing.getCurrentStep()*sliderMorphing.getMaximum()));
+            sliderMorphing.setValue((int) (svgMorphing.getCurrentStep() * sliderMorphing.getMaximum()));
             sliderMorphing.setEnabled(false);
         }
         else{
             btnMorphAnimation.setIcon(icnPlay);
-            sliderMorphing.setValue((int) (svgMorphing.getCurrentStep()*sliderMorphing.getMaximum()));
+            sliderMorphing.setValue((int) (svgMorphing.getCurrentStep() * sliderMorphing.getMaximum()));
             sliderMorphing.setEnabled(true);
         }
     }

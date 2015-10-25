@@ -1,5 +1,8 @@
 package com.bonnyfone.vectalign;
 
+import java.awt.*;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -20,6 +23,10 @@ public class Utils {
     public static final String ANSI_CYAN = "\u001B[36m";
     public static final String ANSI_WHITE = "\u001B[37m";
 
+    public static void copyToClipboard(String data){
+        Clipboard clpbrd = Toolkit.getDefaultToolkit().getSystemClipboard();
+        clpbrd.setContents(new StringSelection(data), null);
+    }
 
     public static String readSequenceFromFile(File f){
         byte[] encoded = new byte[0];

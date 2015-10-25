@@ -5,6 +5,7 @@ import com.bonnyfone.vectalign.PathNodeUtils;
 import com.kitfox.svg.SVGCache;
 import com.kitfox.svg.app.beans.SVGIcon;
 
+import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
@@ -41,7 +42,7 @@ public class SVGDrawingPanel extends RoundedJPanel implements ComponentListener 
     private int height = 522;
     private int viewBoxWidth = width;
     private int viewBoxHeight = height;
-    private float courtesyNegativeSlop = -0.05f;
+    private float courtesyNegativeSlop = -0.01f;
     private float courtesyScaleUp = 1.2f;
     private int viewBoxNegativeSlop = (int) (courtesyNegativeSlop * viewBoxWidth);
 
