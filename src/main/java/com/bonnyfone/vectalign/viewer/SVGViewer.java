@@ -4,13 +4,14 @@ import com.bonnyfone.vectalign.Main;
 import com.bonnyfone.vectalign.SVGParser;
 import com.bonnyfone.vectalign.Utils;
 import com.bonnyfone.vectalign.VectAlign;
-import com.kitfox.svg.SVGDisplayPanel;
+import com.sun.java.swing.plaf.windows.WindowsBorders;
 
 import javax.swing.*;
-import javax.swing.border.TitledBorder;
+import javax.swing.border.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.filechooser.FileFilter;
+import javax.swing.plaf.basic.BasicBorders;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
@@ -18,6 +19,7 @@ import java.io.File;
 public class SVGViewer extends javax.swing.JFrame implements WindowListener, SVGDrawingPanelListener {
     public static final long serialVersionUID = 273462773l;
 
+    private VectAlign.Mode currentAlignMode = VectAlign.Mode.BASE;
     private int hgap = 0;
     private int vgap = 0;
     private int btnIconSize = 23;
@@ -47,6 +49,9 @@ public class SVGViewer extends javax.swing.JFrame implements WindowListener, SVG
 
     //Controls
     private JPanel panelControls;
+    private JRadioButton radioStrategyBase;
+    private JRadioButton radioStrategyLinear;
+
 
     //Output
     private JPanel panelOutput;
@@ -86,7 +91,7 @@ public class SVGViewer extends javax.swing.JFrame implements WindowListener, SVG
 
     private void demo() {
         String sampleA = "M 366.64407,65.08474 L 295.25723,225.79703 L 469.14417,252.02396 L 294.26984,270.55728 L 358.5001,434.26126 L 255.0126,292.0823 L 145.35594,429.55933 L 216.74277,268.84705 L 42.855843,242.62012 L 217.73016,224.08678 L 153.49991,60.38282 L 256.9874,202.56177 L 366.64407,65.08474";
-        String sampleB = "M 91.09553,384.35547 L 91.09553,384.35547 L 109.221924,353.94055 L 127.34833,323.52557 L 145.47473,293.11063 L 163.60114,262.69568 L 181.72754,232.28073 L 199.85393,201.86578 L 217.98033,171.45084 L 236.10672,141.03589 L 254.23312,110.62095 L 405.71802,386.1926 L 91.09553,384.35547";
+        String sampleB = "M 91.095527,384.35546 L 254.23312,110.62095 L 405.71803,386.1926 z";
 
         svgFrom.setPath(sampleA);
         svgTo.setPath(sampleB);
@@ -148,7 +153,7 @@ public class SVGViewer extends javax.swing.JFrame implements WindowListener, SVG
 
     private void reloadMorphing(){
         try{
-            result = VectAlign.align(svgFrom.getPath(), svgTo.getPath(), VectAlign.Mode.BASE);
+            result = VectAlign.align(svgFrom.getPath(), svgTo.getPath(), currentAlignMode);
             svgMorphing.stopAnimation();
             svgMorphing.setPaths(result[0], result[1]);
             svgMorphing.reset();
@@ -194,16 +199,35 @@ public class SVGViewer extends javax.swing.JFrame implements WindowListener, SVG
 
         panelFrom.add(svgFrom, BorderLayout.CENTER);
         panelFrom.add(panelBtnFrom, BorderLayout.SOUTH);
-        panelFrom.setBorder(new TitledBorder("Starting SVG/VD"));
+        panelFrom.setBorder(getCommonBorder("Starting SVG/VD", true));
 
         panelTo.add(svgTo, BorderLayout.CENTER);
         panelTo.add(panelBtnTo, BorderLayout.SOUTH);
-        panelTo.setBorder(new TitledBorder("Ending SVG/VD"));
+        panelTo.setBorder(getCommonBorder("Ending SVG/VD", true));
 
         //Controls
         panelControls = new JPanel(new BorderLayout(hgap, vgap));
         panelControls.setPreferredSize(new Dimension(400, 200));
-        panelControls.setBorder(new TitledBorder("Configure morphing"));
+        panelControls.setBorder(getCommonBorder("Configure morphing", true));
+        panelControls.setLayout(new GridLayout(1, 2));
+        JPanel panelTec = new JPanel();
+        panelTec.setBorder(getCommonBorder("Aligment strategy", false));
+        panelTec.setLayout(new GridLayout(5, 1));
+        ButtonGroup btngrop = new ButtonGroup();
+        radioStrategyBase = new JRadioButton("Base alignment");
+        radioStrategyBase.setSelected(true);
+        radioStrategyLinear = new JRadioButton("Linear alignment");
+        btngrop.add(radioStrategyBase);
+        btngrop.add(radioStrategyLinear);
+        panelTec.add(radioStrategyBase);
+        panelTec.add(radioStrategyLinear);
+
+        JPanel panelPreviewOpt = new JPanel();
+        panelPreviewOpt.setBorder(getCommonBorder("Preview options", false));
+
+        panelControls.add(panelTec);
+        panelControls.add(panelPreviewOpt);
+
 
         panelInput.add(panelFrom);
         panelInput.add(panelTo);
@@ -231,11 +255,11 @@ public class SVGViewer extends javax.swing.JFrame implements WindowListener, SVG
         panelMorphing = new JPanel(new BorderLayout(hgap, vgap));
         panelMorphing.add(svgMorphing, BorderLayout.CENTER);
         panelMorphing.add(bottomMorphing, BorderLayout.SOUTH);
-        panelMorphing.setBorder(BorderFactory.createTitledBorder("AnimatedVectorDrawable (preview)"));
+        panelMorphing.setBorder(getCommonBorder("AnimatedVectorDrawable (preview)", true));
 
         //Output
         panelOutput = new JPanel();
-        panelOutput.setBorder(new TitledBorder("Results (aligned path sequences)"));
+        panelOutput.setBorder(getCommonBorder("Results (aligned path sequences)", true));
         panelOutput.setLayout(new GridBagLayout());
         GridBagConstraints gc1 = new GridBagConstraints();
         gc1.fill = GridBagConstraints.BOTH;
@@ -297,6 +321,10 @@ public class SVGViewer extends javax.swing.JFrame implements WindowListener, SVG
         }
     }
 
+    private Border getCommonBorder(String title, boolean borderLine){
+        return new TitledBorder((borderLine ? new TitledBorder("").getBorder() : new EmptyBorder(0,0,0,0)), title, TitledBorder.LEFT, TitledBorder.ABOVE_TOP, getFont(), Color.DARK_GRAY);
+    }
+
     private void handleSVGLoad(File f, SVGDrawingPanel svg){
         if(SVGParser.isSVGImage(f)) {
             svg.setPath(SVGParser.getPathDataFromSVGFile(f));
@@ -307,6 +335,22 @@ public class SVGViewer extends javax.swing.JFrame implements WindowListener, SVG
     }
 
     private void addListeners() {
+        radioStrategyBase.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                currentAlignMode = VectAlign.Mode.BASE;
+                reloadMorphing();
+            }
+        });
+
+        radioStrategyLinear.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                currentAlignMode = VectAlign.Mode.LINEAR;
+                reloadMorphing();
+            }
+        });
+
         btnCopyFrom.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
