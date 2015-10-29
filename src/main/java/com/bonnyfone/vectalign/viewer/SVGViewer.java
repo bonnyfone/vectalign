@@ -11,7 +11,6 @@ import javax.swing.border.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.filechooser.FileFilter;
-import javax.swing.plaf.basic.BasicBorders;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
@@ -24,8 +23,9 @@ public class SVGViewer extends javax.swing.JFrame implements WindowListener, SVG
     private int vgap = 0;
     private int btnIconSize = 23;
     private Color svgPanelBackgroundColor = Color.WHITE;
-    private String defaultSvgStrokeColor = "black";
-    private String defaultSvgFillColor = SVGDrawingPanel.TRANSPARENT_COLOR;
+    private String currentSvgStrokeColor = "#000000";
+    private String currentSvgFillColor = SVGDrawingPanel.TRANSPARENT_COLOR;
+
     private int defaultStrokeSize = 3;
 
     private SVGDrawingPanel[] svgs;
@@ -51,6 +51,10 @@ public class SVGViewer extends javax.swing.JFrame implements WindowListener, SVG
     private JPanel panelControls;
     private JRadioButton radioStrategyBase;
     private JRadioButton radioStrategyLinear;
+    private JCheckBox checkStrokeColor;
+    private JCheckBox checkFillColor;
+    private JPanel panelStrokeColor;
+    private JPanel panelFillColor;
 
 
     //Output
@@ -59,7 +63,6 @@ public class SVGViewer extends javax.swing.JFrame implements WindowListener, SVG
     private JTextArea svgToOutput;
     private JButton btnCopyFrom;
     private JButton btnCopyTo;
-
 
     private SVGDrawingPanel svgFrom;
     private SVGDrawingPanel svgTo;
@@ -95,11 +98,13 @@ public class SVGViewer extends javax.swing.JFrame implements WindowListener, SVG
 
         svgFrom.setPath(sampleA);
         svgTo.setPath(sampleB);
-        reloadMorphing();
 
+        reloadSvgWithProperties();
+        reloadMorphing();
         for (SVGDrawingPanel svgp : svgs) {
             svgp.renderStep(0.0f);
         }
+
     }
 
     private File showOpenFile(String title){
@@ -137,6 +142,10 @@ public class SVGViewer extends javax.swing.JFrame implements WindowListener, SVG
         return file;
     }
 
+    private Color showColorChooser(String title, Color current){
+        return JColorChooser.showDialog(this, title, current); //TODO simplify chooser
+    }
+
     private String showInputDialog(String title, String defaultText){
         JTextArea msg = new JTextArea(defaultText);
         msg.setLineWrap(true);
@@ -153,19 +162,38 @@ public class SVGViewer extends javax.swing.JFrame implements WindowListener, SVG
 
     private void reloadMorphing(){
         try{
-            result = VectAlign.align(svgFrom.getPath(), svgTo.getPath(), currentAlignMode);
             svgMorphing.stopAnimation();
-            svgMorphing.setPaths(result[0], result[1]);
-            svgMorphing.reset();
 
+            result = VectAlign.align(svgFrom.getPath(), svgTo.getPath(), currentAlignMode);
             svgFromOutput.setText(result[0]);
             svgToOutput.setText(result[1]);
 
+            String strokeColorToApply = checkStrokeColor.isSelected() ? currentSvgStrokeColor : SVGDrawingPanel.TRANSPARENT_COLOR;
+            String fillColorToApply =  checkFillColor.isSelected() ? currentSvgFillColor : SVGDrawingPanel.TRANSPARENT_COLOR;
+            svgMorphing.setStrokeColor(strokeColorToApply);
+            svgMorphing.setFillColor(fillColorToApply);
+            svgMorphing.setStrokeSize(defaultStrokeSize);
+
+            svgMorphing.setPaths(result[0], result[1]);
+            svgMorphing.reset();
             updateMorphingControls();
         }
         catch(Exception e){
             e.printStackTrace();
         }
+    }
+
+    private void reloadSvgWithProperties(){
+        String strokeColorToApply =  checkStrokeColor.isSelected() ? currentSvgStrokeColor : SVGDrawingPanel.TRANSPARENT_COLOR;
+        String fillColorToApply =  checkFillColor.isSelected() ? currentSvgFillColor : SVGDrawingPanel.TRANSPARENT_COLOR;
+        svgFrom.setStrokeColor(strokeColorToApply);
+        svgTo.setStrokeColor(strokeColorToApply);
+        svgFrom.setFillColor(fillColorToApply);
+        svgTo.setFillColor(fillColorToApply);
+        svgFrom.setStrokeSize(defaultStrokeSize);
+        svgTo.setStrokeSize(defaultStrokeSize);
+        svgFrom.redraw();
+        svgTo.redraw();
     }
 
     private void initComponents() {
@@ -224,10 +252,32 @@ public class SVGViewer extends javax.swing.JFrame implements WindowListener, SVG
 
         JPanel panelPreviewOpt = new JPanel();
         panelPreviewOpt.setBorder(getCommonBorder("Preview options", false));
+        panelPreviewOpt.setLayout(new GridLayout(5, 1));
+        checkStrokeColor = new JCheckBox("Stroke (color)", true);
+        checkFillColor = new JCheckBox("Fill (color)", false);
+        panelStrokeColor = new JPanel();
+        panelStrokeColor.setBackground(getCurrentStrokeColor());
+        panelStrokeColor.setPreferredSize(new Dimension(30, 20));
+        panelStrokeColor.setBorder(new WindowsBorders.DashedBorder(Color.darkGray));
+        JPanel innerPanel1 = new JPanel(new FlowLayout());
+        innerPanel1.add(panelStrokeColor);
+        JPanel panelStroke = new JPanel(new BorderLayout());
+        panelStroke.add(checkStrokeColor, BorderLayout.CENTER);
+        panelStroke.add(innerPanel1, BorderLayout.EAST);
+        panelFillColor = new JPanel();
+        panelFillColor.setBackground(getCurrentFillColor());
+        panelFillColor.setPreferredSize(new Dimension(30, 20));
+        panelFillColor.setBorder(new WindowsBorders.DashedBorder(Color.darkGray));
+        JPanel innerPanel2 = new JPanel(new FlowLayout());
+        innerPanel2.add(panelFillColor);
+        JPanel panelFill = new JPanel(new BorderLayout());
+        panelFill.add(checkFillColor, BorderLayout.CENTER);
+        panelFill.add(innerPanel2, BorderLayout.EAST);
+        panelPreviewOpt.add(panelStroke);
+        panelPreviewOpt.add(panelFill);
 
         panelControls.add(panelTec);
         panelControls.add(panelPreviewOpt);
-
 
         panelInput.add(panelFrom);
         panelInput.add(panelTo);
@@ -315,10 +365,20 @@ public class SVGViewer extends javax.swing.JFrame implements WindowListener, SVG
 
         for (SVGDrawingPanel svgp : svgs) {
             svgp.setBackground(svgPanelBackgroundColor);
-            svgp.setStrokeColor(defaultSvgStrokeColor);
-            svgp.setFillColor(defaultSvgFillColor);
-            svgp.setStrokeSize(defaultStrokeSize);
         }
+    }
+
+    private Color getCurrentStrokeColor(){
+        return (SVGDrawingPanel.TRANSPARENT_COLOR.equals(currentSvgStrokeColor) ? Color.getColor("#00FFFFFF") : Color.decode(currentSvgStrokeColor));
+    }
+
+    private Color getCurrentFillColor(){
+        return (SVGDrawingPanel.TRANSPARENT_COLOR.equals(currentSvgFillColor) ? Color.getColor("#00FFFFFF") : Color.decode(currentSvgFillColor));
+    }
+
+
+    private String getHexColor(Color color){
+        return String.format("#%02x%02x%02x", color.getRed(), color.getGreen(), color.getBlue());
     }
 
     private Border getCommonBorder(String title, boolean borderLine){
@@ -335,6 +395,62 @@ public class SVGViewer extends javax.swing.JFrame implements WindowListener, SVG
     }
 
     private void addListeners() {
+
+        ActionListener colorAction = new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                reloadMorphing();
+                reloadSvgWithProperties();
+            }
+        };
+        
+        checkStrokeColor.addActionListener(colorAction);
+        checkFillColor.addActionListener(colorAction);
+
+        panelFillColor.addMouseListener(new MouseListener() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                panelFillColor.setBackground(showColorChooser("Select fill color", getCurrentFillColor()));
+                currentSvgFillColor = getHexColor(panelFillColor.getBackground());
+                reloadSvgWithProperties();
+                reloadMorphing();
+            }
+
+            @Override
+            public void mousePressed(MouseEvent e) {
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+            }
+
+            @Override
+            public void mouseEntered(MouseEvent e) {
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+            }
+        });
+
+        panelStrokeColor.addMouseListener(new MouseListener() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                panelStrokeColor.setBackground(showColorChooser("Select stroke color", getCurrentStrokeColor()));
+                currentSvgStrokeColor = getHexColor(panelStrokeColor.getBackground());
+                reloadSvgWithProperties();
+                reloadMorphing();
+            }
+            @Override
+            public void mousePressed(MouseEvent e) {}
+            @Override
+            public void mouseReleased(MouseEvent e) {}
+            @Override
+            public void mouseEntered(MouseEvent e) {}
+            @Override
+            public void mouseExited(MouseEvent e) {}
+        });
+
         radioStrategyBase.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {

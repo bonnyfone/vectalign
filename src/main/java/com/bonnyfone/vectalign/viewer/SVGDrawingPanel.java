@@ -173,7 +173,7 @@ public class SVGDrawingPanel extends RoundedJPanel implements ComponentListener 
 
         //Rendering step using SVGSalamander...a bit tricky, need to be improved
         StringReader reader = new StringReader(svgFrame);
-        URI uri = SVGCache.getSVGUniverse().loadSVG(reader, frameSeed + "_" + this.hashCode() + "_svg_frame"+step);
+        URI uri = SVGCache.getSVGUniverse().loadSVG(reader, frameSeed + "_" + strokeColor + "_" + fillColor + "_" + this.hashCode() + "_svg_frame"+step);
         svg.setSvgURI(uri);
 
         if(getListener() != null)
