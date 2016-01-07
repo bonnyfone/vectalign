@@ -36,7 +36,7 @@ public class SVGDrawingPanel extends RoundedJPanel implements ComponentListener 
     //Color, stroke
     private String strokeColor;
     private String fillColor;
-    private int strokeSize = 2;
+    private float strokeSize = 2;
 
     private int width = 512;
     private int height = 522;
@@ -173,7 +173,7 @@ public class SVGDrawingPanel extends RoundedJPanel implements ComponentListener 
 
         //Rendering step using SVGSalamander...a bit tricky, need to be improved
         StringReader reader = new StringReader(svgFrame);
-        URI uri = SVGCache.getSVGUniverse().loadSVG(reader, frameSeed + "_" + strokeColor + "_" + fillColor + "_" + this.hashCode() + "_svg_frame"+step);
+        URI uri = SVGCache.getSVGUniverse().loadSVG(reader, frameSeed + "_" + strokeSize + "_" + strokeColor + "_" + fillColor + "_" + this.hashCode() + "_svg_frame"+step);
         svg.setSvgURI(uri);
 
         if(getListener() != null)
@@ -270,11 +270,11 @@ public class SVGDrawingPanel extends RoundedJPanel implements ComponentListener 
         return TRANSPARENT_COLOR;
     }
 
-    public int getStrokeSize(){
+    public float getStrokeSize(){
         return strokeSize;
     }
 
-    public void setStrokeSize(int size){
+    public void setStrokeSize(float size){
         strokeSize = size;
     }
 
