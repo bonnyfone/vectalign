@@ -1,6 +1,7 @@
 package com.bonnyfone.vectalign;
 
 
+import com.bonnyfone.vectalign.viewer.SVGViewer;
 import org.apache.commons.cli.*;
 
 import java.io.File;
@@ -8,7 +9,7 @@ import java.io.IOException;
 import java.util.Comparator;
 
 /**
- * VectorCompatAlign commandline tool
+ * VectorCompatAlign tool (MAIN)
  */
 public class Main {
 
@@ -18,11 +19,11 @@ public class Main {
     private static final String OPTION_HELP = "h";
     private static final String OPTION_VERSION = "v";
     private static final String OPTION_MODE = "m";
+    private static final String OPTION_GUI = "g";
 
     //Application infos
     public static final String VERSION = "0.2";
     public static final String NAME = "VectAlign";
-
 
     /**
      * VectAlign commandLine main
@@ -53,6 +54,10 @@ public class Main {
             }
             else if(commandLine.hasOption(OPTION_VERSION)){
                 System.out.println(NAME + " v"+VERSION);
+                return;
+            }
+            else if(commandLine.hasOption(OPTION_GUI)){
+                SVGViewer.startVectAlignGUI();
                 return;
             }
 
@@ -154,6 +159,10 @@ public class Main {
      */
     private static Options initCommandLineOptions(){
         Options options = new Options();
+
+        options.addOption(OptionBuilder.withLongOpt("gui")
+                .withDescription("Start VectAlign GUI")
+                .create(OPTION_GUI));
 
         options.addOption(OptionBuilder.withLongOpt("start")
                 .withDescription("Starting VectorDrawable path (\"string\", txt file or SVG file)")

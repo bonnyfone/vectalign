@@ -649,8 +649,7 @@ public class SVGViewer extends javax.swing.JFrame implements WindowListener, SVG
 
     }
 
-    //MAIN
-    public static void main(String args[]) {
+    public static void startVectAlignGUI(){
         //Apply Nimbus LaF if possible
         try {
             UIManager.setLookAndFeel("com.sun.java.swing.plaf.nimbus.NimbusLookAndFeel");
@@ -662,5 +661,10 @@ public class SVGViewer extends javax.swing.JFrame implements WindowListener, SVG
                 new SVGViewer().setVisible(true);
             }
         });
+    }
+
+    //MAIN
+    public static void main(String args[]) {
+        startVectAlignGUI();
     }
 }
