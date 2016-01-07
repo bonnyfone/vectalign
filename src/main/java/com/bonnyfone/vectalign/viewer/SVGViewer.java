@@ -101,11 +101,10 @@ public class SVGViewer extends javax.swing.JFrame implements WindowListener, SVG
         svgTo.setPath(sampleB);
 
         reloadSvgWithProperties();
-        reloadMorphing();
+        reloadMorphing(true);
         for (SVGDrawingPanel svgp : svgs) {
             svgp.renderStep(0.0f);
         }
-
     }
 
     private File showOpenFile(String title){
@@ -161,23 +160,27 @@ public class SVGViewer extends javax.swing.JFrame implements WindowListener, SVG
             return defaultText;
     }
 
-    private void reloadMorphing(){
+    private void reloadMorphing(boolean recalculateMorphing){
         try{
             svgMorphing.stopAnimation();
-
-            result = VectAlign.align(svgFrom.getPath(), svgTo.getPath(), currentAlignMode);
-            svgFromOutput.setText(result[0]);
-            svgToOutput.setText(result[1]);
-
+            
             String strokeColorToApply = checkStrokeColor.isSelected() ? currentSvgStrokeColor : SVGDrawingPanel.TRANSPARENT_COLOR;
             String fillColorToApply =  checkFillColor.isSelected() ? currentSvgFillColor : SVGDrawingPanel.TRANSPARENT_COLOR;
             svgMorphing.setStrokeColor(strokeColorToApply);
             svgMorphing.setFillColor(fillColorToApply);
             svgMorphing.setStrokeSize(strokeSize);
 
-            svgMorphing.setPaths(result[0], result[1]);
-            svgMorphing.reset();
-            updateMorphingControls();
+            if(recalculateMorphing){
+                result = VectAlign.align(svgFrom.getPath(), svgTo.getPath(), currentAlignMode);
+                svgFromOutput.setText(result[0]);
+                svgToOutput.setText(result[1]);
+                svgMorphing.setPaths(result[0], result[1]);
+                svgMorphing.reset();
+                updateMorphingControls();
+                recalculateMorphing = false;
+            }else
+                svgMorphing.redraw();
+
         }
         catch(Exception e){
             e.printStackTrace();
@@ -289,7 +292,7 @@ public class SVGViewer extends javax.swing.JFrame implements WindowListener, SVG
                     double newValue = (double) ((JSpinner) e.getSource()).getValue();
                     strokeSize = (float) newValue;
                     reloadSvgWithProperties();
-                    reloadMorphing();
+                    reloadMorphing(false);
                 }
                 catch(Exception ex ){
                     ex.printStackTrace();
@@ -416,7 +419,7 @@ public class SVGViewer extends javax.swing.JFrame implements WindowListener, SVG
         if(SVGParser.isSVGImage(f)) {
             svg.setPath(SVGParser.getPathDataFromSVGFile(f));
             svg.redraw();
-            reloadMorphing();
+            reloadMorphing(true);
         } else
             System.out.println("Error: not a valid SVG");
     }
@@ -426,7 +429,7 @@ public class SVGViewer extends javax.swing.JFrame implements WindowListener, SVG
         ActionListener colorAction = new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                reloadMorphing();
+                reloadMorphing(false);
                 reloadSvgWithProperties();
             }
         };
@@ -440,7 +443,7 @@ public class SVGViewer extends javax.swing.JFrame implements WindowListener, SVG
                 panelFillColor.setBackground(showColorChooser("Select fill color", getCurrentFillColor()));
                 currentSvgFillColor = getHexColor(panelFillColor.getBackground());
                 reloadSvgWithProperties();
-                reloadMorphing();
+                reloadMorphing(false);
             }
 
             @Override
@@ -466,7 +469,7 @@ public class SVGViewer extends javax.swing.JFrame implements WindowListener, SVG
                 panelStrokeColor.setBackground(showColorChooser("Select stroke color", getCurrentStrokeColor()));
                 currentSvgStrokeColor = getHexColor(panelStrokeColor.getBackground());
                 reloadSvgWithProperties();
-                reloadMorphing();
+                reloadMorphing(false);
             }
             @Override
             public void mousePressed(MouseEvent e) {}
@@ -482,7 +485,7 @@ public class SVGViewer extends javax.swing.JFrame implements WindowListener, SVG
             @Override
             public void actionPerformed(ActionEvent e) {
                 currentAlignMode = VectAlign.Mode.BASE;
-                reloadMorphing();
+                reloadMorphing(true);
             }
         });
 
@@ -490,7 +493,7 @@ public class SVGViewer extends javax.swing.JFrame implements WindowListener, SVG
             @Override
             public void actionPerformed(ActionEvent e) {
                 currentAlignMode = VectAlign.Mode.LINEAR;
-                reloadMorphing();
+                reloadMorphing(true);
             }
         });
 
@@ -545,7 +548,7 @@ public class SVGViewer extends javax.swing.JFrame implements WindowListener, SVG
             public void actionPerformed(ActionEvent e) {
                 svgFrom.setPath(showInputDialog("Edit STARTING path", svgFrom.getPath()));
                 svgFrom.redraw();
-                reloadMorphing();
+                reloadMorphing(true);
             }
         });
 
@@ -554,7 +557,7 @@ public class SVGViewer extends javax.swing.JFrame implements WindowListener, SVG
             public void actionPerformed(ActionEvent e) {
                 svgTo.setPath(showInputDialog("Edit ENDING path", svgTo.getPath()));
                 svgTo.redraw();
-                reloadMorphing();
+                reloadMorphing(true);
             }
         });
 
