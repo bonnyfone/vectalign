@@ -1,10 +1,7 @@
 package com.bonnyfone.vectalign;
 
 import android.support.v7.graphics.drawable.PathParser;
-import com.bonnyfone.vectalign.techniques.AbstractFillMode;
-import com.bonnyfone.vectalign.techniques.BaseFillMode;
-import com.bonnyfone.vectalign.techniques.LinearInterpolateFillMode;
-import com.bonnyfone.vectalign.techniques.NWAlignment;
+import com.bonnyfone.vectalign.techniques.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -14,7 +11,7 @@ import java.util.Arrays;
  */
 public class VectAlign {
 
-    private static final int MAX_ALIGN_ITERATIONS = 5;
+    public static final int MAX_ALIGN_ITERATIONS = 5;
 
     /**
      * Alignment technique
@@ -23,15 +20,24 @@ public class VectAlign {
         /**
          * Inject necessary elements by repeating existing ones
          */
-        BASE(1),
+        BASE(0),
 
         /**
          * Inject necessary elements and interpolates coordinates where possible
          */
-        LINEAR(2);
+        LINEAR(4),
+
+        /**
+         * Use sub-aligning and inject necessary elements by repeating existing ones
+         */
+        SUBALIGN_BASE(1),
+
+        /**
+         * Use sub-aligning and inject necessary elements and interpolates coordinates where possible
+         */
+        SUBALIGN_LINEAR(5);
 
         //TODO more technique
-
 
         private int mode;
         Mode(int mode){
@@ -47,7 +53,6 @@ public class VectAlign {
     public static boolean canMorph(String from, String to) {
         return PathParser.canMorph(PathParser.createNodesFromPathData(from), PathParser.createNodesFromPathData(to));
     }
-
 
     /**
      * Align two VectorDrawable sequences in order to make them <i>morphable</i>
@@ -71,56 +76,53 @@ public class VectAlign {
             System.out.println(" >> Paths are already morphable!!! Leaving sequences untouched <<");
         }
         else{
+            /* ## ALIGN TECHNIQUE ## */
 
-            //Aligning
-            boolean equivalent = false;
-            int extraCloneNodes = 0;
-            ArrayList<PathParser.PathDataNode> alignedFrom = null;
-            ArrayList<PathParser.PathDataNode> alignedTo = null;
+            ArrayList<PathParser.PathDataNode>[] aligns = null;
+            switch (alignMode){
+                case BASE:
+                case LINEAR:
+                    aligns = new RawAlignMode().align(fromList, toList);
+                    break;
+                case SUBALIGN_BASE:
+                case SUBALIGN_LINEAR:
+                    aligns = new SubAlignMode().align(fromList, toList);
+                    break;
 
-            for(int i = 0; i < MAX_ALIGN_ITERATIONS && !equivalent; i++){
-                System.out.println(i + ". align iteration...");
-                NWAlignment nw = new NWAlignment(PathNodeUtils.transform(fromList, extraCloneNodes, true), PathNodeUtils.transform(toList, extraCloneNodes, true));
-                nw.align();
-                alignedFrom = nw.getAlignedFrom();
-                alignedTo = nw.getAlignedTo();
-                equivalent = PathNodeUtils.isEquivalent(nw.getOriginalFrom(), nw.getAlignedFrom()) && PathNodeUtils.isEquivalent(nw.getOriginalTo(), nw.getAlignedTo());
-
-                if(equivalent){
-                    System.out.println("Alignment found!");
-                    System.out.println(PathNodeUtils.pathNodesToString(nw.getAlignedFrom(), true));
-                    System.out.println(PathNodeUtils.pathNodesToString(nw.getAlignedTo(), true));
-                }
-                extraCloneNodes++;
+                //TODO handle more case here if needed
             }
 
-            if(!equivalent){
+            if(aligns == null){
                 System.err.println("Unable to NW-align lists!");
                 return null;
             }
             else
-                System.out.println("Sequence aligned! (" + alignedFrom.size()+ " elements)");
+                System.out.println("Sequence aligned! (" + aligns[0].size()+ " elements)");
+
+
+            /* ## FILL TECHNIQUE ## */
 
             AbstractFillMode fillMode = null;
             switch (alignMode){
                 case BASE:
+                case SUBALIGN_BASE:
                     fillMode = new BaseFillMode();
                     break;
-
                 case LINEAR:
+                case SUBALIGN_LINEAR:
                     fillMode = new LinearInterpolateFillMode();
                     break;
 
-               //TODO handle more cases here
+               //TODO handle more cases here if needed
             }
 
             //Fill
-            fillMode.fillInjectedNodes(alignedFrom, alignedTo);
+            fillMode.fillInjectedNodes(aligns[0], aligns[1]);
 
             //Simplify
-            PathNodeUtils.simplify(alignedFrom, alignedTo);
+            PathNodeUtils.simplify(aligns[0], aligns[1]);
 
-            result = new String[]{PathNodeUtils.pathNodesToString(alignedFrom), PathNodeUtils.pathNodesToString(alignedTo)};
+            result = new String[]{PathNodeUtils.pathNodesToString(aligns[0]), PathNodeUtils.pathNodesToString(aligns[1])};
         }
         return result;
     }

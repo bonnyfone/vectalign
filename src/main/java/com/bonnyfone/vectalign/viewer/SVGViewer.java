@@ -51,6 +51,8 @@ public class SVGViewer extends javax.swing.JFrame implements WindowListener, SVG
     private JPanel panelControls;
     private JRadioButton radioStrategyBase;
     private JRadioButton radioStrategyLinear;
+    private JRadioButton radioStrategySubBase;
+    private JRadioButton radioStrategySubLinear;
     private JCheckBox checkStrokeColor;
     private JCheckBox checkFillColor;
     private JPanel panelStrokeColor;
@@ -246,13 +248,19 @@ public class SVGViewer extends javax.swing.JFrame implements WindowListener, SVG
         panelTec.setBorder(getCommonBorder("Aligment strategy", false));
         panelTec.setLayout(new GridLayout(5, 1));
         ButtonGroup btngrop = new ButtonGroup();
-        radioStrategyBase = new JRadioButton("Base alignment");
+        radioStrategyBase = new JRadioButton("Base");
         radioStrategyBase.setSelected(true);
-        radioStrategyLinear = new JRadioButton("Linear alignment");
+        radioStrategyLinear = new JRadioButton("Linear");
+        radioStrategySubBase = new JRadioButton("Subalign Base");
+        radioStrategySubLinear = new JRadioButton("Subalign Linear");
         btngrop.add(radioStrategyBase);
         btngrop.add(radioStrategyLinear);
+        btngrop.add(radioStrategySubBase);
+        btngrop.add(radioStrategySubLinear);
         panelTec.add(radioStrategyBase);
         panelTec.add(radioStrategyLinear);
+        panelTec.add(radioStrategySubBase);
+        panelTec.add(radioStrategySubLinear);
 
         JPanel panelPreviewOpt = new JPanel();
         panelPreviewOpt.setBorder(getCommonBorder("Preview options", false));
@@ -493,6 +501,22 @@ public class SVGViewer extends javax.swing.JFrame implements WindowListener, SVG
             @Override
             public void actionPerformed(ActionEvent e) {
                 currentAlignMode = VectAlign.Mode.LINEAR;
+                reloadMorphing(true);
+            }
+        });
+
+        radioStrategySubBase.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                currentAlignMode = VectAlign.Mode.SUBALIGN_BASE;
+                reloadMorphing(true);
+            }
+        });
+
+        radioStrategySubLinear.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                currentAlignMode = VectAlign.Mode.SUBALIGN_LINEAR;
                 reloadMorphing(true);
             }
         });

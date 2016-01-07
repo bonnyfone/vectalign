@@ -163,6 +163,16 @@ public class VectAlignTest {
         testRandomAligns(VectAlign.Mode.LINEAR);
     }
 
+    @Test
+    public void testRandomSubBaseAligns() throws Exception {
+        testRandomAligns(VectAlign.Mode.SUBALIGN_BASE);
+    }
+
+    @Test
+    public void testRandomSubLinearAligns() throws Exception {
+        testRandomAligns(VectAlign.Mode.SUBALIGN_LINEAR);
+    }
+
     public void testRandomAligns(VectAlign.Mode mode) throws Exception {
         System.out.println("Testing random sequences alignment "+ mode.toString() + "...");
         ArrayList<PathParser.PathDataNode> all = new ArrayList<>();
