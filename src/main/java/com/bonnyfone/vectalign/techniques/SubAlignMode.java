@@ -20,28 +20,28 @@ public class SubAlignMode extends RawAlignMode {
 
         int fromSize = transformFrom.size();
         int toSize = transformTo.size();
-        int max = Math.max(fromSize, toSize);
         int min = Math.min(fromSize, toSize);
-        int numberOfSubAligns = Math.max(2, (max / min));
+        int numberOfSubAligns = (int) Math.max(1, min/2);
+        System.out.println("Estimated number of sub-alignments: "+numberOfSubAligns);
         int fromChunkSize = fromSize / numberOfSubAligns;
         int toChunkSize = toSize / numberOfSubAligns;
 
         ArrayList<PathParser.PathDataNode> finalFrom = new ArrayList<>();
         ArrayList<PathParser.PathDataNode> finalTo = new ArrayList<>();
-        int endFromIndex, endToIndex;
-        boolean transformZ = true;
+        int startFromIndex, startToIndex, endFromIndex, endToIndex;
         for(int i=0; i < numberOfSubAligns; i++){
             if(i == numberOfSubAligns-1){
                 endFromIndex = fromSize;
                 endToIndex = toSize;
-                transformZ = false;
             }
             else{
                 endFromIndex = Math.min(fromSize, (i + 1) * (fromChunkSize));
                 endToIndex = Math.min(toSize, (i + 1) * (toChunkSize));
             }
-            //ArrayList<PathParser.PathDataNode>[] subAlign = doRawAlign(Arrays.copyOfRange(from, i * fromChunkSize, endFromIndex), Arrays.copyOfRange(to, i * toChunkSize, endToIndex), transformZ);
-            ArrayList<PathParser.PathDataNode>[] subAlign = doRawAlign(transformFrom.subList(i * fromChunkSize, endFromIndex).toArray(new PathParser.PathDataNode[1]), transformTo.subList(i * toChunkSize, endToIndex).toArray(new PathParser.PathDataNode[1]));
+            startFromIndex = i * fromChunkSize;
+            startToIndex = i * toChunkSize;
+            System.out.println("Subaligning FROM("+startFromIndex +","+endFromIndex+") - TO("+startToIndex +","+endToIndex+")");
+            ArrayList<PathParser.PathDataNode>[] subAlign = doRawAlign(transformFrom.subList(startFromIndex, endFromIndex).toArray(new PathParser.PathDataNode[1]), transformTo.subList(startToIndex, endToIndex).toArray(new PathParser.PathDataNode[1]));
             finalFrom.addAll(subAlign[0]);
             finalTo.addAll(subAlign[1]);
         }
