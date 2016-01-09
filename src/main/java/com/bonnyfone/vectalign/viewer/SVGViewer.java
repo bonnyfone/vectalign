@@ -508,7 +508,7 @@ public class SVGViewer extends javax.swing.JFrame implements WindowListener, SVG
         radioStrategySubBase.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                currentAlignMode = VectAlign.Mode.SUBALIGN_BASE;
+                currentAlignMode = VectAlign.Mode.SUB_BASE;
                 reloadMorphing(true);
             }
         });
@@ -516,7 +516,7 @@ public class SVGViewer extends javax.swing.JFrame implements WindowListener, SVG
         radioStrategySubLinear.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                currentAlignMode = VectAlign.Mode.SUBALIGN_LINEAR;
+                currentAlignMode = VectAlign.Mode.SUB_LINEAR;
                 reloadMorphing(true);
             }
         });

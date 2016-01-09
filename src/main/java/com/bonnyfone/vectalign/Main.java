@@ -167,19 +167,19 @@ public class Main {
         options.addOption(OptionBuilder.withLongOpt("start")
                 .withDescription("Starting VectorDrawable path (\"string\", txt file or SVG file)")
                 .hasArg()
-                .withArgName("\"STRING\"|TXT_FILE|SVG_FILE")
+                .withArgName("\"string\"|txt_file|svg_file")
                 .create(OPTION_FROM));
 
         options.addOption(OptionBuilder.withLongOpt("end")
                 .withDescription("Ending VectorDrawable path (\"string\", txt file or SVG file)")
                 .hasArg()
-                .withArgName("\"STRING\"|TXT_FILE|SVG_FILE")
+                .withArgName("\"string\"|txt_file|svg_file")
                 .create(OPTION_TO));
 
         options.addOption(OptionBuilder.withLongOpt("mode")
                 .withDescription("Aligning technique (default is BASE)")
                 .hasArg()
-                .withArgName("BASE|LINEAR")
+                .withArgName("BASE|LINEAR|SUB_BASE|SUB_LINEAR")
                 .create(OPTION_MODE));
 
         options.addOption(OptionBuilder.withLongOpt("version")

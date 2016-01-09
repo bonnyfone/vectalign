@@ -30,12 +30,12 @@ public class VectAlign {
         /**
          * Use sub-aligning and inject necessary elements by repeating existing ones
          */
-        SUBALIGN_BASE(1),
+        SUB_BASE(1),
 
         /**
          * Use sub-aligning and inject necessary elements and interpolates coordinates where possible
          */
-        SUBALIGN_LINEAR(5);
+        SUB_LINEAR(5);
 
         //TODO more technique
 
@@ -84,8 +84,8 @@ public class VectAlign {
                 case LINEAR:
                     aligns = new RawAlignMode().align(fromList, toList);
                     break;
-                case SUBALIGN_BASE:
-                case SUBALIGN_LINEAR:
+                case SUB_BASE:
+                case SUB_LINEAR:
                     aligns = new SubAlignMode().align(fromList, toList);
                     break;
 
@@ -105,11 +105,11 @@ public class VectAlign {
             AbstractFillMode fillMode = null;
             switch (alignMode){
                 case BASE:
-                case SUBALIGN_BASE:
+                case SUB_BASE:
                     fillMode = new BaseFillMode();
                     break;
                 case LINEAR:
-                case SUBALIGN_LINEAR:
+                case SUB_LINEAR:
                     fillMode = new LinearInterpolateFillMode();
                     break;
 

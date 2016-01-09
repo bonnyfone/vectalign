@@ -165,12 +165,12 @@ public class VectAlignTest {
 
     @Test
     public void testRandomSubBaseAligns() throws Exception {
-        testRandomAligns(VectAlign.Mode.SUBALIGN_BASE);
+        testRandomAligns(VectAlign.Mode.SUB_BASE);
     }
 
     @Test
     public void testRandomSubLinearAligns() throws Exception {
-        testRandomAligns(VectAlign.Mode.SUBALIGN_LINEAR);
+        testRandomAligns(VectAlign.Mode.SUB_LINEAR);
     }
 
     public void testRandomAligns(VectAlign.Mode mode) throws Exception {
