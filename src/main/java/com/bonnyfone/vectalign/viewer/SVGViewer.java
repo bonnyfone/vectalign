@@ -24,7 +24,7 @@ public class SVGViewer extends javax.swing.JFrame implements WindowListener, SVG
     private int btnIconSize = 23;
     private Color svgPanelBackgroundColor = Color.WHITE;
     private String currentSvgStrokeColor = "#000000";
-    private String currentSvgFillColor = "#FF6666"; //SVGDrawingPanel.TRANSPARENT_COLOR;
+    private String currentSvgFillColor = "#0099CC"; //SVGDrawingPanel.TRANSPARENT_COLOR;
 
     private float strokeSize = 2.0f;
 
@@ -46,6 +46,8 @@ public class SVGViewer extends javax.swing.JFrame implements WindowListener, SVG
     private JButton btnEditTo;
     private JButton btnSvgFrom;
     private JButton btnSvgTo;
+    private File fileFrom;
+    private File fileTo;
 
     //Controls
     private JPanel panelControls;
@@ -109,9 +111,12 @@ public class SVGViewer extends javax.swing.JFrame implements WindowListener, SVG
         }
     }
 
-    private File showOpenFile(String title){
+    private File showOpenFile(String title, File lastFile){
         final JFileChooser fc = new JFileChooser();
         fc.setDialogTitle(title);
+        if(lastFile != null)
+            fc.setSelectedFile(lastFile);
+
         fc.setFileFilter(new FileFilter() {
             @Override
             public boolean accept(File f) {
@@ -556,14 +561,16 @@ public class SVGViewer extends javax.swing.JFrame implements WindowListener, SVG
         btnSvgFrom.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                handleSVGLoad(showOpenFile("Load SVG"), svgFrom);
+                fileFrom = showOpenFile("Load SVG", fileFrom);
+                handleSVGLoad(fileFrom, svgFrom);
             }
         });
 
         btnSvgTo.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                handleSVGLoad(showOpenFile("Load SVG"), svgTo);
+                fileTo = showOpenFile("Load SVG", fileTo);
+                handleSVGLoad(fileTo, svgTo);
             }
         });
 
