@@ -1,9 +1,6 @@
 package com.bonnyfone.vectalign.viewer;
 
-import com.bonnyfone.vectalign.Main;
-import com.bonnyfone.vectalign.SVGParser;
-import com.bonnyfone.vectalign.Utils;
-import com.bonnyfone.vectalign.VectAlign;
+import com.bonnyfone.vectalign.*;
 import com.sun.java.swing.plaf.windows.WindowsBorders;
 
 import javax.swing.*;
@@ -18,6 +15,7 @@ import java.io.File;
 public class SVGViewer extends javax.swing.JFrame implements WindowListener, SVGDrawingPanelListener {
     public static final long serialVersionUID = 273462773l;
 
+    private static final int DEFAULT_EXPORT_SIZE = 300;
     private VectAlign.Mode currentAlignMode = VectAlign.Mode.BASE;
     private int hgap = 0;
     private int vgap = 0;
@@ -37,6 +35,7 @@ public class SVGViewer extends javax.swing.JFrame implements WindowListener, SVG
     private ImageIcon icnPlay;
     private ImageIcon icnPause;
     private ImageIcon icnCopy;
+    private ImageIcon icnExport;
     private SVGDrawingPanel svgMorphing;
 
     //Input SVGs
@@ -68,6 +67,8 @@ public class SVGViewer extends javax.swing.JFrame implements WindowListener, SVG
     private JTextArea svgToOutput;
     private JButton btnCopyFrom;
     private JButton btnCopyTo;
+    private JButton btnExport;
+    private File outDir;
 
     private SVGDrawingPanel svgFrom;
     private SVGDrawingPanel svgTo;
@@ -90,6 +91,7 @@ public class SVGViewer extends javax.swing.JFrame implements WindowListener, SVG
         icnPlay = new ImageIcon((new ImageIcon(this.getClass().getResource("/icn_play.png")).getImage().getScaledInstance(btnIconSize, btnIconSize, java.awt.Image.SCALE_SMOOTH)));
         icnPause = new ImageIcon((new ImageIcon(this.getClass().getResource("/icn_pause.png")).getImage().getScaledInstance(btnIconSize, btnIconSize, java.awt.Image.SCALE_SMOOTH)));
         icnCopy = new ImageIcon((new ImageIcon(this.getClass().getResource("/icn_copy.png")).getImage().getScaledInstance(btnIconSize, btnIconSize, java.awt.Image.SCALE_SMOOTH)));
+        icnExport = new ImageIcon((new ImageIcon(this.getClass().getResource("/export-icon.png")).getImage().getScaledInstance(btnIconSize, btnIconSize, java.awt.Image.SCALE_SMOOTH)));
     }
 
     private void center(){
@@ -109,6 +111,36 @@ public class SVGViewer extends javax.swing.JFrame implements WindowListener, SVG
         for (SVGDrawingPanel svgp : svgs) {
             svgp.renderStep(0.0f);
         }
+    }
+
+    private File showOpenDir(String title, File lastFile){
+        final JFileChooser fc = new JFileChooser();
+        fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        fc.setDialogTitle(title);
+        if(lastFile != null)
+            fc.setSelectedFile(lastFile);
+
+        fc.setFileFilter(new FileFilter() {
+            @Override
+            public boolean accept(File f) {
+                if (f.isDirectory())
+                    return true;
+                return false;
+            }
+
+            @Override
+            public String getDescription() {
+                return "Directory";
+            }
+
+        });
+
+        int returnVal = fc.showOpenDialog(null);
+        File file = null;
+        if(returnVal == JFileChooser.APPROVE_OPTION)
+            file = fc.getSelectedFile();
+
+        return file;
     }
 
     private File showOpenFile(String title, File lastFile){
@@ -170,7 +202,7 @@ public class SVGViewer extends javax.swing.JFrame implements WindowListener, SVG
     private void reloadMorphing(boolean recalculateMorphing){
         try{
             svgMorphing.stopAnimation();
-            
+
             String strokeColorToApply = checkStrokeColor.isSelected() ? currentSvgStrokeColor : SVGDrawingPanel.TRANSPARENT_COLOR;
             String fillColorToApply =  checkFillColor.isSelected() ? currentSvgFillColor : SVGDrawingPanel.TRANSPARENT_COLOR;
             svgMorphing.setStrokeColor(strokeColorToApply);
@@ -301,13 +333,12 @@ public class SVGViewer extends javax.swing.JFrame implements WindowListener, SVG
         spinnerStroke = new JSpinner(spinnerModel);
         spinnerStroke.addChangeListener(new ChangeListener() {
             public void stateChanged(ChangeEvent e) {
-                try{
+                try {
                     double newValue = (double) ((JSpinner) e.getSource()).getValue();
                     strokeSize = (float) newValue;
                     reloadSvgWithProperties();
                     reloadMorphing(false);
-                }
-                catch(Exception ex ){
+                } catch (Exception ex) {
                     ex.printStackTrace();
                 }
             }
@@ -378,6 +409,11 @@ public class SVGViewer extends javax.swing.JFrame implements WindowListener, SVG
         gcBtn2.gridy = 1;
         gcBtn2.weightx = 0.025f;
         gcBtn2.weighty = 0.5f;
+        GridBagConstraints export = new GridBagConstraints();
+        export.fill = GridBagConstraints.BOTH;
+        export.gridheight = 2;
+        //export.weightx = 0.025f;
+        //export.weighty = 1.0f;
 
         svgFromOutput = new JTextArea();
         svgFromOutput.setEditable(false);
@@ -391,10 +427,13 @@ public class SVGViewer extends javax.swing.JFrame implements WindowListener, SVG
         btnCopyFrom.setToolTipText("Copy aligned STARTING path to clipboard");
         btnCopyTo = new JButton(icnCopy);
         btnCopyTo.setToolTipText("Copy aligned ENDING path to clipboard");
+        btnExport = new JButton("Export", icnExport);
+        btnExport.setToolTipText("Export Android XML files");
         panelOutput.add(scroll1, gc1);
         panelOutput.add(btnCopyFrom, gcBtn1);
         panelOutput.add(scroll2, gc2);
         panelOutput.add(btnCopyTo, gcBtn2);
+        panelOutput.add(btnExport, export);
 
         mainLayout = new BorderLayout(hgap, vgap);
         setLayout(mainLayout);
@@ -539,6 +578,20 @@ public class SVGViewer extends javax.swing.JFrame implements WindowListener, SVG
             public void actionPerformed(ActionEvent e) {
                 Utils.copyToClipboard(svgToOutput.getText());
                 svgToOutput.select(0, svgToOutput.getText().length());
+            }
+        });
+
+        btnExport.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                outDir = showOpenDir("Choose output directory", outDir);
+                if(outDir != null){
+                    boolean success = AnimatedVectorDrawableUtils.export(outDir, result, currentSvgStrokeColor, currentSvgFillColor, DEFAULT_EXPORT_SIZE, DEFAULT_EXPORT_SIZE, svgMorphing.getSVGViewBoxWidth(), svgMorphing.getSVGViewBoxHeight());
+                    if(success)
+                        JOptionPane.showMessageDialog(SVGViewer.this, "Export completed ("+outDir.getAbsolutePath() +")", "VectAlign Export", JOptionPane.INFORMATION_MESSAGE);
+                    else
+                        JOptionPane.showMessageDialog(SVGViewer.this, "Unable to export files to "+outDir.getAbsolutePath() , "VectAlign Export", JOptionPane.ERROR_MESSAGE);
+                }
             }
         });
 

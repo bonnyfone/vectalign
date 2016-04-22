@@ -4,6 +4,7 @@ import java.awt.*;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -38,6 +39,20 @@ public class Utils {
         }
 
         return null;
+    }
+
+    public static boolean writeToFile(String path, String data){
+        File newTextFile = new File(path);
+        FileWriter fw = null;
+        try {
+            fw = new FileWriter(newTextFile);
+            fw.write(data);
+            fw.close();
+            return true;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 
 
