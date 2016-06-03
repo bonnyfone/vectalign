@@ -7,10 +7,10 @@ import java.io.File;
  */
 public class AnimatedVectorDrawableUtils {
 
-    private static String RESULT_DIR = "vectalign_export";
-    private static String VECTOR_DRAWABLE_NAME = "vectalign_vector_drawable";
-    private static String ANIMATED_VECTOR_DRAWABLE_NAME = "vectalign_animated_vector_drawable";
-    private static String MORPH_ANIMATOR_NAME = "vectalign_morph_animator";
+    private static String RESULT_DIR = "exported";
+    private static String VECTOR_DRAWABLE_NAME = "vector_drawable";
+    private static String ANIMATED_VECTOR_DRAWABLE_NAME = "animated_vector_drawable";
+    private static String MORPH_ANIMATOR_NAME = "morph_animator";
 
     private static String TEMPLATE_VECTOR_DRAWABLE =
             "<vector xmlns:android=\"http://schemas.android.com/apk/res/android\"\n" +
@@ -44,9 +44,12 @@ public class AnimatedVectorDrawableUtils {
             "         android:valueType=\"pathType\"/>\n" +
             " </set>";
 
-    public static boolean export(File destinationDir, String[] solution, boolean stroke, boolean fill, String strokeColor, int strokeWidth, String fillColor, int width, int height, int viewportWidth, int viewportHeight){
+    public static boolean export(File destinationDir, String prefix, String[] solution, boolean stroke, boolean fill, String strokeColor, int strokeWidth, String fillColor, int width, int height, int viewportWidth, int viewportHeight){
         try{
-            String basePath = destinationDir.getAbsolutePath()+"/"+RESULT_DIR;
+            if(prefix != null && !"".equals(prefix) && !prefix.endsWith("_")){
+                prefix = prefix + "_";
+            }
+            String basePath = destinationDir.getAbsolutePath()+"/" + prefix + RESULT_DIR;
             File baseDir = new File(basePath);
             if(baseDir.exists()){
                 int i=1;
@@ -65,9 +68,9 @@ public class AnimatedVectorDrawableUtils {
                 int toIndex  = (j+1)%2;
                 String fromString = fromIndex == 0 ? "start" : "end";
                 String toString = toIndex == 1 ? "end" : "start";
-                String genVDName = VECTOR_DRAWABLE_NAME + "_" + fromString;
-                String genMAName = MORPH_ANIMATOR_NAME + "_" + fromString + "_to_" + toString;
-                String getAVDName = ANIMATED_VECTOR_DRAWABLE_NAME + "_" + fromString + "_to_" + toString;
+                String genVDName = prefix + VECTOR_DRAWABLE_NAME + "_" + fromString;
+                String genMAName = prefix + MORPH_ANIMATOR_NAME + "_" + fromString + "_to_" + toString;
+                String getAVDName = prefix + ANIMATED_VECTOR_DRAWABLE_NAME + "_" + fromString + "_to_" + toString;
                 String vectorDrawable = String.format(TEMPLATE_VECTOR_DRAWABLE, height, width, viewportHeight, viewportWidth, strokeColor, stroke ? strokeWidth : 0, fill ? fillColor : "#00000000", solution[fromIndex]);
                 String animatedVectorDrawable = String.format(TEMPLATE_ANIMATED_VECTOR_DRAWABLE, genVDName, genMAName);
                 String morphAnimator = String.format(TEMPLATE_MORPH_ANIMATOR, solution[fromIndex], solution[toIndex]);

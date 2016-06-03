@@ -69,6 +69,7 @@ public class SVGViewer extends javax.swing.JFrame implements WindowListener, SVG
     private JButton btnCopyTo;
     private JButton btnExport;
     private File outDir;
+    private String lastUsedPrefix;
 
     private SVGDrawingPanel svgFrom;
     private SVGDrawingPanel svgTo;
@@ -586,7 +587,17 @@ public class SVGViewer extends javax.swing.JFrame implements WindowListener, SVG
             public void actionPerformed(ActionEvent e) {
                 outDir = showOpenDir("Choose output directory", outDir);
                 if(outDir != null){
-                    boolean success = AnimatedVectorDrawableUtils.export(outDir, result,
+
+                    //Chose prefix
+                    String defaultPrefix = "vectalign";
+                    String prefix = (String) JOptionPane.showInputDialog(SVGViewer.this, "Chose a prefix for your exported files", "Export prefix", JOptionPane.PLAIN_MESSAGE, null, null, lastUsedPrefix != null? lastUsedPrefix : defaultPrefix);
+                    if(prefix == null || prefix.trim().equals("")){
+                        prefix = "";
+                    }
+                    lastUsedPrefix = prefix.toLowerCase();
+
+                    //Export
+                    boolean success = AnimatedVectorDrawableUtils.export(outDir, lastUsedPrefix, result,
                             checkStrokeColor.isSelected(), checkFillColor.isSelected(),
                             currentSvgStrokeColor, (int) Math.max(1.0f, Math.round(strokeSize)), currentSvgFillColor,
                             DEFAULT_EXPORT_SIZE, DEFAULT_EXPORT_SIZE, svgMorphing.getSVGViewBoxWidth(), svgMorphing.getSVGViewBoxHeight());
