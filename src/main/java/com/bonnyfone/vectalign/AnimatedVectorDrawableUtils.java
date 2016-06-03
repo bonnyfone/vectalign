@@ -46,9 +46,6 @@ public class AnimatedVectorDrawableUtils {
 
     public static boolean export(File destinationDir, String[] solution, boolean stroke, boolean fill, String strokeColor, int strokeWidth, String fillColor, int width, int height, int viewportWidth, int viewportHeight){
         try{
-            String vectorDrawable = String.format(TEMPLATE_VECTOR_DRAWABLE, height, width, viewportHeight, viewportWidth, strokeColor, stroke ? strokeWidth : 0, fill ? fillColor : "#00000000", solution[0]);
-            String animatedVectorDrawable = String.format(TEMPLATE_ANIMATED_VECTOR_DRAWABLE, VECTOR_DRAWABLE_NAME, MORPH_ANIMATOR_NAME);
-            String morphAnimator = String.format(TEMPLATE_MORPH_ANIMATOR, solution[0], solution[1]);
             String basePath = destinationDir.getAbsolutePath()+"/"+RESULT_DIR;
             File baseDir = new File(basePath);
             if(baseDir.exists()){
@@ -63,9 +60,22 @@ public class AnimatedVectorDrawableUtils {
             drawableDir.mkdirs();
             animDir.mkdirs();
 
-            Utils.writeToFile(drawableDir.getAbsolutePath() + "/" + VECTOR_DRAWABLE_NAME + ".xml", vectorDrawable);
-            Utils.writeToFile(drawableDir.getAbsolutePath()+"/"+ANIMATED_VECTOR_DRAWABLE_NAME + ".xml", animatedVectorDrawable);
-            Utils.writeToFile(animDir.getAbsolutePath()+"/"+MORPH_ANIMATOR_NAME + ".xml", morphAnimator);
+            for(int j=0; j<solution.length; j++){
+                int fromIndex = j;
+                int toIndex  = (j+1)%2;
+                String fromString = fromIndex == 0 ? "start" : "end";
+                String toString = toIndex == 1 ? "end" : "start";
+                String genVDName = VECTOR_DRAWABLE_NAME + "_" + fromString;
+                String genMAName = MORPH_ANIMATOR_NAME + "_" + fromString + "_to_" + toString;
+                String getAVDName = ANIMATED_VECTOR_DRAWABLE_NAME + "_" + fromString + "_to_" + toString;
+                String vectorDrawable = String.format(TEMPLATE_VECTOR_DRAWABLE, height, width, viewportHeight, viewportWidth, strokeColor, stroke ? strokeWidth : 0, fill ? fillColor : "#00000000", solution[fromIndex]);
+                String animatedVectorDrawable = String.format(TEMPLATE_ANIMATED_VECTOR_DRAWABLE, genVDName, genMAName);
+                String morphAnimator = String.format(TEMPLATE_MORPH_ANIMATOR, solution[fromIndex], solution[toIndex]);
+
+                Utils.writeToFile(drawableDir.getAbsolutePath() + "/" + genVDName + ".xml", vectorDrawable);
+                Utils.writeToFile(drawableDir.getAbsolutePath()+"/"+ getAVDName + ".xml", animatedVectorDrawable);
+                Utils.writeToFile(animDir.getAbsolutePath()+"/"+ genMAName + ".xml", morphAnimator);
+            }
 
             return true;
         }
