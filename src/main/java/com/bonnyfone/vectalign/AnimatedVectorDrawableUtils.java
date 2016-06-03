@@ -8,9 +8,9 @@ import java.io.File;
 public class AnimatedVectorDrawableUtils {
 
     private static String RESULT_DIR = "vectalign_export";
-    private static String VECTOR_DRAWABLE_NAME = "vectalign_vector_drawable.xml";
-    private static String ANIMATED_VECTOR_DRAWABLE_NAME = "vectalign_animated_vector_drawable.xml";
-    private static String MORPH_ANIMATOR_NAME = "vectalign_morph_animator.xml";
+    private static String VECTOR_DRAWABLE_NAME = "vectalign_vector_drawable";
+    private static String ANIMATED_VECTOR_DRAWABLE_NAME = "vectalign_animated_vector_drawable";
+    private static String MORPH_ANIMATOR_NAME = "vectalign_morph_animator";
 
     private static String TEMPLATE_VECTOR_DRAWABLE =
             "<vector xmlns:android=\"http://schemas.android.com/apk/res/android\"\n" +
@@ -21,6 +21,7 @@ public class AnimatedVectorDrawableUtils {
             "     <path\n" +
             "         android:name=\"v\"\n" +
             "         android:strokeColor=\"%s\"\n" +
+            "         android:strokeWidth=\"%d\"\n" +
             "         android:fillColor=\"%s\"\n" +
             "         android:pathData=\"%s\" />\n" +
             " </vector>";
@@ -43,9 +44,9 @@ public class AnimatedVectorDrawableUtils {
             "         android:valueType=\"pathType\"/>\n" +
             " </set>";
 
-    public static boolean export(File destinationDir, String[] solution, String strokeColor, String fillColor, int width, int height, int viewportWidth, int viewportHeight){
+    public static boolean export(File destinationDir, String[] solution, boolean stroke, boolean fill, String strokeColor, int strokeWidth, String fillColor, int width, int height, int viewportWidth, int viewportHeight){
         try{
-            String vectorDrawable = String.format(TEMPLATE_VECTOR_DRAWABLE, height, width, viewportHeight, viewportWidth, strokeColor, fillColor, solution[0]);
+            String vectorDrawable = String.format(TEMPLATE_VECTOR_DRAWABLE, height, width, viewportHeight, viewportWidth, strokeColor, stroke ? strokeWidth : 0, fill ? fillColor : "#00000000", solution[0]);
             String animatedVectorDrawable = String.format(TEMPLATE_ANIMATED_VECTOR_DRAWABLE, VECTOR_DRAWABLE_NAME, MORPH_ANIMATOR_NAME);
             String morphAnimator = String.format(TEMPLATE_MORPH_ANIMATOR, solution[0], solution[1]);
             String basePath = destinationDir.getAbsolutePath()+"/"+RESULT_DIR;
@@ -62,9 +63,9 @@ public class AnimatedVectorDrawableUtils {
             drawableDir.mkdirs();
             animDir.mkdirs();
 
-            Utils.writeToFile(drawableDir.getAbsolutePath() + "/" + VECTOR_DRAWABLE_NAME, vectorDrawable);
-            Utils.writeToFile(drawableDir.getAbsolutePath()+"/"+ANIMATED_VECTOR_DRAWABLE_NAME, animatedVectorDrawable);
-            Utils.writeToFile(animDir.getAbsolutePath()+"/"+MORPH_ANIMATOR_NAME, morphAnimator);
+            Utils.writeToFile(drawableDir.getAbsolutePath() + "/" + VECTOR_DRAWABLE_NAME + ".xml", vectorDrawable);
+            Utils.writeToFile(drawableDir.getAbsolutePath()+"/"+ANIMATED_VECTOR_DRAWABLE_NAME + ".xml", animatedVectorDrawable);
+            Utils.writeToFile(animDir.getAbsolutePath()+"/"+MORPH_ANIMATOR_NAME + ".xml", morphAnimator);
 
             return true;
         }

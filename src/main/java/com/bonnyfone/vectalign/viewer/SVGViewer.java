@@ -586,7 +586,11 @@ public class SVGViewer extends javax.swing.JFrame implements WindowListener, SVG
             public void actionPerformed(ActionEvent e) {
                 outDir = showOpenDir("Choose output directory", outDir);
                 if(outDir != null){
-                    boolean success = AnimatedVectorDrawableUtils.export(outDir, result, currentSvgStrokeColor, currentSvgFillColor, DEFAULT_EXPORT_SIZE, DEFAULT_EXPORT_SIZE, svgMorphing.getSVGViewBoxWidth(), svgMorphing.getSVGViewBoxHeight());
+                    boolean success = AnimatedVectorDrawableUtils.export(outDir, result,
+                            checkStrokeColor.isSelected(), checkFillColor.isSelected(),
+                            currentSvgStrokeColor, (int) Math.max(1.0f, Math.round(strokeSize)), currentSvgFillColor,
+                            DEFAULT_EXPORT_SIZE, DEFAULT_EXPORT_SIZE, svgMorphing.getSVGViewBoxWidth(), svgMorphing.getSVGViewBoxHeight());
+
                     if(success)
                         JOptionPane.showMessageDialog(SVGViewer.this, "Export completed ("+outDir.getAbsolutePath() +")", "VectAlign Export", JOptionPane.INFORMATION_MESSAGE);
                     else
