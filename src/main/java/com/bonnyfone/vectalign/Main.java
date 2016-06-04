@@ -1,7 +1,7 @@
 package com.bonnyfone.vectalign;
 
 
-import com.bonnyfone.vectalign.viewer.SVGViewer;
+import com.bonnyfone.vectalign.viewer.VectAlignViewer;
 import org.apache.commons.cli.*;
 
 import java.io.File;
@@ -48,16 +48,16 @@ public class Main {
             CommandLineParser parser = new DefaultParser();
             CommandLine commandLine = parser.parse(options, args);
 
-            if(commandLine.getOptions()== null || commandLine.getOptions().length == 0 || commandLine.hasOption(OPTION_HELP)){
-                printHelp(options);
+            if(commandLine.getOptions()== null || commandLine.getOptions().length == 0 || commandLine.hasOption(OPTION_GUI)){
+                VectAlignViewer.startVectAlignGUI();
                 return;
             }
             else if(commandLine.hasOption(OPTION_VERSION)){
                 System.out.println(NAME + " v"+VERSION);
                 return;
             }
-            else if(commandLine.hasOption(OPTION_GUI)){
-                SVGViewer.startVectAlignGUI();
+            else if(commandLine.hasOption(OPTION_HELP)){
+                printHelp(options);
                 return;
             }
 

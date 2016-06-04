@@ -12,7 +12,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
 
-public class SVGViewer extends javax.swing.JFrame implements WindowListener, SVGDrawingPanelListener {
+public class VectAlignViewer extends javax.swing.JFrame implements WindowListener, SVGDrawingPanelListener {
     public static final long serialVersionUID = 273462773l;
 
     private static final int DEFAULT_EXPORT_SIZE = 300;
@@ -77,7 +77,7 @@ public class SVGViewer extends javax.swing.JFrame implements WindowListener, SVG
 
     private String[] result;
 
-    public SVGViewer() {
+    public VectAlignViewer() {
         initIcons();
         initComponents();
         addListeners();
@@ -590,7 +590,7 @@ public class SVGViewer extends javax.swing.JFrame implements WindowListener, SVG
 
                     //Chose prefix
                     String defaultPrefix = "vectalign";
-                    String prefix = (String) JOptionPane.showInputDialog(SVGViewer.this, "Chose a prefix for your exported files", "Export prefix", JOptionPane.PLAIN_MESSAGE, null, null, lastUsedPrefix != null? lastUsedPrefix : defaultPrefix);
+                    String prefix = (String) JOptionPane.showInputDialog(VectAlignViewer.this, "Chose a prefix for your exported files", "Export prefix", JOptionPane.PLAIN_MESSAGE, null, null, lastUsedPrefix != null? lastUsedPrefix : defaultPrefix);
                     if(prefix == null || prefix.trim().equals("")){
                         prefix = "";
                     }
@@ -603,9 +603,9 @@ public class SVGViewer extends javax.swing.JFrame implements WindowListener, SVG
                             DEFAULT_EXPORT_SIZE, DEFAULT_EXPORT_SIZE, svgMorphing.getSVGViewBoxWidth(), svgMorphing.getSVGViewBoxHeight());
 
                     if(success)
-                        JOptionPane.showMessageDialog(SVGViewer.this, "Export completed ("+outDir.getAbsolutePath() +")", "VectAlign Export", JOptionPane.INFORMATION_MESSAGE);
+                        JOptionPane.showMessageDialog(VectAlignViewer.this, "Export completed ("+outDir.getAbsolutePath() +")", "VectAlign Export", JOptionPane.INFORMATION_MESSAGE);
                     else
-                        JOptionPane.showMessageDialog(SVGViewer.this, "Unable to export files to "+outDir.getAbsolutePath() , "VectAlign Export", JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(VectAlignViewer.this, "Unable to export files to "+outDir.getAbsolutePath() , "VectAlign Export", JOptionPane.ERROR_MESSAGE);
                 }
             }
         });
@@ -757,7 +757,7 @@ public class SVGViewer extends javax.swing.JFrame implements WindowListener, SVG
 
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new SVGViewer().setVisible(true);
+                new VectAlignViewer().setVisible(true);
             }
         });
     }
