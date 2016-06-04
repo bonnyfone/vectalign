@@ -15,7 +15,6 @@ import java.io.File;
 public class VectAlignViewer extends javax.swing.JFrame implements WindowListener, SVGDrawingPanelListener {
     public static final long serialVersionUID = 273462773l;
 
-    private static final int DEFAULT_EXPORT_SIZE = 300;
     private VectAlign.Mode currentAlignMode = VectAlign.Mode.BASE;
     private int hgap = 0;
     private int vgap = 0;
@@ -112,36 +111,6 @@ public class VectAlignViewer extends javax.swing.JFrame implements WindowListene
         for (SVGDrawingPanel svgp : svgs) {
             svgp.renderStep(0.0f);
         }
-    }
-
-    private File showOpenDir(String title, File lastFile){
-        final JFileChooser fc = new JFileChooser();
-        fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-        fc.setDialogTitle(title);
-        if(lastFile != null)
-            fc.setSelectedFile(lastFile);
-
-        fc.setFileFilter(new FileFilter() {
-            @Override
-            public boolean accept(File f) {
-                if (f.isDirectory())
-                    return true;
-                return false;
-            }
-
-            @Override
-            public String getDescription() {
-                return "Directory";
-            }
-
-        });
-
-        int returnVal = fc.showOpenDialog(null);
-        File file = null;
-        if(returnVal == JFileChooser.APPROVE_OPTION)
-            file = fc.getSelectedFile();
-
-        return file;
     }
 
     private File showOpenFile(String title, File lastFile){
@@ -585,28 +554,11 @@ public class VectAlignViewer extends javax.swing.JFrame implements WindowListene
         btnExport.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                outDir = showOpenDir("Choose output directory", outDir);
-                if(outDir != null){
-
-                    //Chose prefix
-                    String defaultPrefix = "vectalign";
-                    String prefix = (String) JOptionPane.showInputDialog(VectAlignViewer.this, "Chose a prefix for your exported files", "Export prefix", JOptionPane.PLAIN_MESSAGE, null, null, lastUsedPrefix != null? lastUsedPrefix : defaultPrefix);
-                    if(prefix == null || prefix.trim().equals("")){
-                        prefix = "";
-                    }
-                    lastUsedPrefix = prefix.toLowerCase();
-
-                    //Export
-                    boolean success = AnimatedVectorDrawableUtils.export(outDir, lastUsedPrefix, result,
-                            checkStrokeColor.isSelected(), checkFillColor.isSelected(),
-                            currentSvgStrokeColor, (int) Math.max(1.0f, Math.round(strokeSize)), currentSvgFillColor,
-                            DEFAULT_EXPORT_SIZE, DEFAULT_EXPORT_SIZE, svgMorphing.getSVGViewBoxWidth(), svgMorphing.getSVGViewBoxHeight());
-
-                    if(success)
-                        JOptionPane.showMessageDialog(VectAlignViewer.this, "Export completed ("+outDir.getAbsolutePath() +")", "VectAlign Export", JOptionPane.INFORMATION_MESSAGE);
-                    else
-                        JOptionPane.showMessageDialog(VectAlignViewer.this, "Unable to export files to "+outDir.getAbsolutePath() , "VectAlign Export", JOptionPane.ERROR_MESSAGE);
-                }
+                VectAlignExportDialog exportPanel = new VectAlignExportDialog(result, currentSvgStrokeColor, currentSvgFillColor,
+                        (int)Math.max(1.0f, Math.round(strokeSize)), checkStrokeColor.isSelected(), checkFillColor.isSelected(),
+                        svgMorphing.getSVGViewBoxWidth(), svgMorphing.getSVGViewBoxHeight());
+                exportPanel.setModal(true);
+                exportPanel.setVisible(true);
             }
         });
 
