@@ -73,7 +73,6 @@ public class SVGDrawingPanel extends RoundedJPanel implements ComponentListener 
 
     @Override
     public void componentResized(ComponentEvent e) {
-        System.out.println(e.getComponent().getSize());
         adaptSizeWithoutStretch(e.getComponent().getSize());
     }
 
