@@ -7,44 +7,47 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 /**
- * Created by ziby on 07/08/15.
+ * Base fill mode which will fill the eventual holes using neutral nodes.
  */
-public class BaseFillMode extends AbstractFillMode{
+public class BaseFillMode extends AbstractFillMode {
+
+    protected float[][] penPosFrom;
+    protected float[][] penPosTo;
+    protected float[][] penPosFromAfter;
+    protected float[][] penPosToAfter;
 
     @Override
     public void fillInjectedNodes(ArrayList<PathParser.PathDataNode> from, ArrayList<PathParser.PathDataNode> to) {
         PathParser.PathDataNode nodePlaceholder, nodeMaster;
 
-        float[][] penPosFrom = PathNodeUtils.calculatePenPosition(from);
-        float[][] penPosTo = PathNodeUtils.calculatePenPosition(to);
+        penPosFrom = PathNodeUtils.calculatePenPosition(from);
+        penPosTo = PathNodeUtils.calculatePenPosition(to);
         float[][] penPosPlaceholder = null;
         float[][] penPosMaster = null;
         ArrayList<PathParser.PathDataNode> listMaster = null;
         ArrayList<PathParser.PathDataNode> listPlaceholder = null;
 
-        for(int i=0; i < from.size(); i++){
-            if(from.get(i).mType == PathNodeUtils.CMD_PLACEHOLDER){
+        for (int i = 0; i < from.size(); i++) {
+            if (from.get(i).mType == PathNodeUtils.CMD_PLACEHOLDER) {
                 nodePlaceholder = from.get(i);
                 nodeMaster = to.get(i);
                 penPosPlaceholder = penPosFrom;
                 penPosMaster = penPosTo;
                 listMaster = to;
                 listPlaceholder = from;
-            }
-            else if(to.get(i).mType == PathNodeUtils.CMD_PLACEHOLDER){
+            } else if (to.get(i).mType == PathNodeUtils.CMD_PLACEHOLDER) {
                 nodePlaceholder = to.get(i);
                 nodeMaster = from.get(i);
                 penPosPlaceholder = penPosTo;
                 penPosMaster = penPosFrom;
                 listMaster = from;
                 listPlaceholder = to;
-            }
-            else{
+            } else {
                 nodeMaster = null;
                 nodePlaceholder = null;
             }
 
-            if(nodeMaster == null || nodePlaceholder == null)
+            if (nodeMaster == null || nodePlaceholder == null)
                 continue;
 
 
@@ -52,20 +55,19 @@ public class BaseFillMode extends AbstractFillMode{
             nodePlaceholder.mParams = PathParser.copyOfRange(nodeMaster.mParams, 0, nodeMaster.mParams.length);
 
             float lastPlaceholderX, lastPlaceholderY, lastMasterX, lastMasterY;
-            if(i>0){
-                lastPlaceholderX = penPosPlaceholder[i-1][0];
-                lastPlaceholderY = penPosPlaceholder[i-1][1];
-                lastMasterX = penPosMaster[i-1][0];
-                lastMasterY = penPosMaster[i-1][1];
-            }
-            else{
+            if (i > 0) {
+                lastPlaceholderX = penPosPlaceholder[i - 1][0];
+                lastPlaceholderY = penPosPlaceholder[i - 1][1];
+                lastMasterX = penPosMaster[i - 1][0];
+                lastMasterY = penPosMaster[i - 1][1];
+            } else {
                 lastPlaceholderX = 0;
                 lastPlaceholderY = 0;
                 lastMasterX = 0;
                 lastMasterY = 0;
             }
 
-            if(Character.toLowerCase(nodeMaster.mType) == 'z'){
+            if (Character.toLowerCase(nodeMaster.mType) == 'z') {
                 //Injecting a 'z' means we need to counterbalance the last path position with an extra 'm'
                 PathParser.PathDataNode extraMoveNodePlaceholder = new PathParser.PathDataNode('M', new float[]{lastPlaceholderX, lastPlaceholderY});
                 PathParser.PathDataNode extraMoveNodeMaster = new PathParser.PathDataNode('M', new float[]{lastMasterX, lastMasterY});
@@ -78,44 +80,47 @@ public class BaseFillMode extends AbstractFillMode{
                 penPosFrom = PathNodeUtils.calculatePenPosition(from);
                 penPosTo = PathNodeUtils.calculatePenPosition(to);
 
-            }
-            else if(Character.isLowerCase(nodePlaceholder.mType)){ // this is a relative movement. If we want to create extra nodes, we need to create neutral relative commands
+            } else if (Character.isLowerCase(nodePlaceholder.mType)) { // this is a relative movement. If we want to create extra nodes, we need to create neutral relative commands
                 Arrays.fill(nodePlaceholder.mParams, 0.0f); //FIXME is good?
-            }
-            else{
-                if(nodePlaceholder.mType == 'V'){
-                    nodePlaceholder.mParams[0] =  lastPlaceholderY;
-                }
-                else if (nodePlaceholder.mType == 'H') {
-                    nodePlaceholder.mParams[0] =  lastPlaceholderX;
-                }
-                else{
-                    for(int j = 0; j< nodePlaceholder.mParams.length; j++){
+            } else {
+                if (nodePlaceholder.mType == 'V') {
+                    nodePlaceholder.mParams[0] = lastPlaceholderY;
+                } else if (nodePlaceholder.mType == 'H') {
+                    nodePlaceholder.mParams[0] = lastPlaceholderX;
+                } else {
+                    for (int j = 0; j < nodePlaceholder.mParams.length; j++) {
                         nodePlaceholder.mParams[j++] = lastPlaceholderX;
                         nodePlaceholder.mParams[j] = lastPlaceholderY;
                     }
                 }
             }
-
         }
 
-        float[][] penPosFromAfter = PathNodeUtils.calculatePenPosition(from);
-        float[][] penPosToAfter = PathNodeUtils.calculatePenPosition(to);
+        penPosFromAfter = PathNodeUtils.calculatePenPosition(from);
+        penPosToAfter = PathNodeUtils.calculatePenPosition(to);
+        checkPenPosValidity();
+    }
 
-        if(        (penPosFromAfter[penPosFromAfter.length-1][0] == penPosFrom[penPosFrom.length-1][0])
-                && (penPosFromAfter[penPosFromAfter.length-1][1] == penPosFrom[penPosFrom.length-1][1])
-                && (penPosToAfter[penPosToAfter.length-1][0] == penPosTo[penPosTo.length-1][0])
-                && (penPosToAfter[penPosToAfter.length-1][1] == penPosTo[penPosTo.length-1][1])){
+
+    /**
+     * Check injection validity //TODO this is an approximated check which needs improvements
+     * @return
+     */
+    protected boolean checkPenPosValidity() {
+        if ((penPosFromAfter[penPosFromAfter.length - 1][0] == penPosFrom[penPosFrom.length - 1][0])
+                && (penPosFromAfter[penPosFromAfter.length - 1][1] == penPosFrom[penPosFrom.length - 1][1])
+                && (penPosToAfter[penPosToAfter.length - 1][0] == penPosTo[penPosTo.length - 1][0])
+                && (penPosToAfter[penPosToAfter.length - 1][1] == penPosTo[penPosTo.length - 1][1])) {
 
             System.out.println("Injection completed correctly!");
-        }
-        else{
+            return true;
+        } else {
             System.out.println("PROBLEM during injection!");
             System.out.println("PenPos from");
             StringBuffer sb = new StringBuffer();
             int i = 0;
-            for(float[] coord : penPosFrom){
-                sb.append((++i)+"p. " +coord[0]+" , "+coord[1] +"\n") ;
+            for (float[] coord : penPosFrom) {
+                sb.append((++i) + "p. " + coord[0] + " , " + coord[1] + "\n");
             }
             System.out.println(sb.toString());
 
@@ -123,8 +128,8 @@ public class BaseFillMode extends AbstractFillMode{
             System.out.println("PenPos fromAfter");
             sb = new StringBuffer();
             i = 0;
-            for(float[] coord : penPosFromAfter){
-                sb.append((++i)+"p. " +coord[0]+" , "+coord[1] +"\n") ;
+            for (float[] coord : penPosFromAfter) {
+                sb.append((++i) + "p. " + coord[0] + " , " + coord[1] + "\n");
             }
             System.out.println(sb.toString());
 
@@ -132,8 +137,8 @@ public class BaseFillMode extends AbstractFillMode{
             System.out.println("PenPos to");
             sb = new StringBuffer();
             i = 0;
-            for(float[] coord : penPosTo){
-                sb.append((++i)+"p. " +coord[0]+" , "+coord[1] +"\n") ;
+            for (float[] coord : penPosTo) {
+                sb.append((++i) + "p. " + coord[0] + " , " + coord[1] + "\n");
             }
             System.out.println(sb.toString());
 
@@ -141,13 +146,12 @@ public class BaseFillMode extends AbstractFillMode{
             System.out.println("PenPos toAfter");
             sb = new StringBuffer();
             i = 0;
-            for(float[] coord : penPosToAfter){
-                sb.append((++i)+"p. " +coord[0]+" , "+coord[1] +"\n") ;
+            for (float[] coord : penPosToAfter) {
+                sb.append((++i) + "p. " + coord[0] + " , " + coord[1] + "\n");
             }
             System.out.println(sb.toString());
 
-
+            return false;
         }
-
     }
 }

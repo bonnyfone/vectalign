@@ -154,8 +154,27 @@ public class VectAlignTest {
     }
 
     @Test
-    public void testRandomAligns() throws Exception {
-        System.out.println("Testing random sequences alignment...");
+    public void testRandomBaseAligns() throws Exception {
+        testRandomAligns(VectAlign.Mode.BASE);
+    }
+
+    @Test
+    public void testRandomLinearInterpolateAligns() throws Exception {
+        testRandomAligns(VectAlign.Mode.LINEAR);
+    }
+
+    @Test
+    public void testRandomSubBaseAligns() throws Exception {
+        testRandomAligns(VectAlign.Mode.SUB_BASE);
+    }
+
+    @Test
+    public void testRandomSubLinearAligns() throws Exception {
+        testRandomAligns(VectAlign.Mode.SUB_LINEAR);
+    }
+
+    public void testRandomAligns(VectAlign.Mode mode) throws Exception {
+        System.out.println("Testing random sequences alignment "+ mode.toString() + "...");
         ArrayList<PathParser.PathDataNode> all = new ArrayList<>();
         all.addAll(PathNodeUtils.transform(pentagonData));
         all.addAll(PathNodeUtils.transform(pentagonAlterData));
@@ -167,7 +186,7 @@ public class VectAlignTest {
         all.addAll(PathNodeUtils.transform(romboData));
         all.addAll(PathNodeUtils.transform(squareData));
 
-        int experiments = 1000;
+        int experiments = 500;
         int extraCopyInTransform = 2;
         Random r = new Random(System.currentTimeMillis());
         ArrayList<PathParser.PathDataNode> l1 = new ArrayList<>();
@@ -194,8 +213,7 @@ public class VectAlignTest {
                 else
                     lists[j].addAll(all.subList(n2, n1));
             }
-
-            String[] ris = VectAlign.align(PathNodeUtils.pathNodesToString(l1), PathNodeUtils.pathNodesToString(l2), VectAlign.Mode.BASE);
+            String[] ris = VectAlign.align(PathNodeUtils.pathNodesToString(l1), PathNodeUtils.pathNodesToString(l2), mode);
 
             if(VectAlign.canMorph(ris[0], ris[1])){
                 success++;
@@ -250,8 +268,6 @@ public class VectAlignTest {
 
         System.out.println("FINISH: success("+success+"), fail("+fail+") --> success rate " +((float)success / (success+fail))*100.0f+"%");
         assertTrue(success == experiments);
-
-
 
     }
 }

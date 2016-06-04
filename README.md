@@ -1,6 +1,9 @@
-# VectAlign [ ![Download](https://api.bintray.com/packages/bonnyfone/maven/org.bonnyfone.vectalign/images/download.svg) ](https://bintray.com/artifact/download/bonnyfone/maven/vectalign-0.1-jar-with-dependencies.jar) [![Android Arsenal](https://img.shields.io/badge/Android%20Arsenal-VectAlign-brightgreen.svg?style=flat)](http://android-arsenal.com/details/1/2443)
+# VectAlign [ ![Download](https://api.bintray.com/packages/bonnyfone/maven/org.bonnyfone.vectalign/images/download.svg) ](https://bintray.com/artifact/download/bonnyfone/maven/vectalign-0.2-jar-with-dependencies.jar) [![Android Arsenal](https://img.shields.io/badge/Android%20Arsenal-VectAlign-brightgreen.svg?style=flat)](http://android-arsenal.com/details/1/2443)
 
-**VectAlign** (a.k.a. *VectorDrawableAlign*) is a command line tool which automagically **aligns two `VectorDrawable` "pathData" strings in order to allow morphing animations** between them through an `AnimatedVectorDrawable`. 
+**VectAlign** (a.k.a. *VectorDrawableAlign*) is a developer's tool which automagically **aligns two `VectorDrawable` "pathData" strings (or SVG images) in order to allow morphing animations** between them using an `AnimatedVectorDrawable`. VectAlign can be used from command line or through a simple GUI (which includes *morphing preview* and *export* functionalities).
+
+
+<img src="http://s33.postimg.org/qiaafk7xb/vectalign_0_2_demo.gif" width="500px">
 
 Here are some examples of what you can do with the help of VectAlign (take a look at the [sample project] for a live demo):
 
@@ -10,6 +13,8 @@ Here are some examples of what you can do with the help of VectAlign (take a loo
 <img src="http://s18.postimg.org/79coo8vid/morph3.gif" width="120px">
 <img src="http://s9.postimg.org/a5tdgfppn/morph4.gif" width="140px">
 
+ The problem
+--
 
 As stated in the [official docs] two paths must be *compatible* so that they can be morphed, which means that the **paths must be composed by the same list of SVG commands** (in terms of length and type of commands). 
 
@@ -41,12 +46,32 @@ When the morphing involves only simple shapes is averagely simple to fix the pat
 --
 You can download the latest version of the pre-compiled jar from **[here]**.
 
+ Changelog
+--
+ - **v0.2** 
+  - added different morphing strategies (BASE, LINEAR, SUB\_BASE, SUB\_LINEAR)
+  - added GUI (view, load and edit SVG/pathData, *morphing preview*)
+  - added *export* function (automatically creates all the Android XML resources required)
+ 
+ - **v0.1** 
+  - first public release of VectAlign (command line only)
 
  Usage
 --
-Run VectAlign from command line by passing the two paths that you want to use in your morphing animation; you can pass these sequences by typing them directly or by referring a file (a simple txt file or even a standard SVG image):
+Run VectAlign from command line by passing the two paths that you want to use in your morphing animation; you can pass these sequences by typing them directly or by referring a file (a simple txt file or even a standard SVG image); simply pass no params if you want to start the GUI:
 
 **Examples of execution**
+
+Run VectAlign in GUI mode:
+```bash
+java -jar  vectalign.jar 
+```
+```bash
+java -jar  vectalign.jar --gui
+```
+
+Run VectAlign in command line mode:
+
 ```bash
 java -jar  vectalign.jar   --start "M 10,20..."   --end "M 30,30..."
 ```
@@ -72,18 +97,21 @@ M 48.0,54.0 L 48.0,54.0 L 48.0,54.0 L 48.0,54.0 L 31.0,54.0 L 15.0,54.0 L 10.0,3
 **Available options**
 
 ```bash
-usage: java -jar vectalign.jar  [-s <SEQUENCE | TXT_FILE | SVG_FILE>] 
-                                [-e <SEQUENCE | TXT_FILE | SVG_FILE>] [-v] [-h]
+usage: java -jar vectalign.jar  [-g] [-s <"string"|txt_file|svg_file>] [-e <"string"|txt_file|svg_file>] [-m <BASE|LINEAR|SUB_BASE|SUB_LINEAR>] [-v] [-h]
 
-Options:
+Align two VectorDrawable paths in order to allow morphing animations
+between them.
 
- -s,--start <SEQUENCE | TXT_FILE | SVG_FILE>   VectorDrawable sequence (or
-                                               SVG file) which represents
-                                               the starting image
- -e,--end <SEQUENCE | TXT_FILE | SVG_FILE>     VectorDrawable sequence (or
-                                               SVG file) which represents
-                                               the ending image
- -v,--version                                  Print the version of the 
+ -g,--gui                                      Start VectAlign GUI
+ -s,--start <"string"|txt_file|svg_file>       Starting VectorDrawable
+                                               path ("string", txt file or
+                                               SVG file)
+ -e,--end <"string"|txt_file|svg_file>         Ending VectorDrawable path
+                                               ("string", txt file or SVG
+                                               file)
+ -m,--mode <BASE|LINEAR|SUB_BASE|SUB_LINEAR>   Aligning technique (default
+                                               is BASE)
+ -v,--version                                  Print the version of the
                                                application
  -h,--help
 ```
