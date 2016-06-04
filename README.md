@@ -3,7 +3,7 @@
 **VectAlign** (a.k.a. *VectorDrawableAlign*) is a developer's tool which automagically **aligns two `VectorDrawable` "pathData" strings (or SVG images) in order to allow morphing animations** between them using an `AnimatedVectorDrawable`. VectAlign can be used from command line or through a simple GUI (which includes *morphing preview* and *export* functionalities).
 
 
-<img src="http://s33.postimg.org/qiaafk7xb/vectalign_0_2_demo.gif" width="500px">
+<img src="http://s33.postimg.org/qiaafk7xb/vectalign_0_2_demo.gif" width="530px">
 
 Here are some examples of what you can do with the help of VectAlign (take a look at the [sample project] for a live demo):
 
