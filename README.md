@@ -172,4 +172,4 @@ limitations under the License.
 [SVG Paths Specification]:http://www.w3.org/TR/SVG/paths.html
 [VectorDrawableCompat on support library v7 (partial)]:https://android.googlesource.com/platform/frameworks/support/+/master/v7/vectordrawable/src/android/support/v7/graphics/drawable
 [sample project]:https://github.com/bonnyfone/vectalign-samples/
-[here]:https://bintray.com/artifact/download/bonnyfone/maven/vectalign-0.1-jar-with-dependencies.jar
+[here]:https://bintray.com/artifact/download/bonnyfone/maven/vectalign-0.2-jar-with-dependencies.jar
