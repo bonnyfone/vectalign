@@ -179,7 +179,15 @@ public class SVGDrawingPanel extends RoundedJPanel implements ComponentListener 
             getListener().onMorphingChanges(currentStep);
 
         //refresh
-        updateUI();
+        if (SwingUtilities.isEventDispatchThread()){
+            updateUI();
+        } else {
+            SwingUtilities.invokeLater(new Runnable(){
+                public void run(){
+                    updateUI();
+                }
+            });
+        }
     }
 
     public synchronized void toggleAnimation(){
