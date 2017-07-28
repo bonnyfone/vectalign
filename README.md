@@ -7,11 +7,7 @@
 
 Here are some examples of what you can do with the help of VectAlign (take a look at the [sample project] for a live demo):
 
-<img src="http://s4.postimg.org/boxc1zk0p/morph2.gif" width="110px">
-<img src="http://s21.postimg.org/4657b7m0j/morph1.gif" width="110px">
-<img src="http://s28.postimg.org/8mdcxb48t/morph5.gif" width="110px">
-<img src="http://s18.postimg.org/79coo8vid/morph3.gif" width="120px">
-<img src="http://s9.postimg.org/a5tdgfppn/morph4.gif" width="140px">
+<img src="http://s4.postimg.org/boxc1zk0p/morph2.gif" width="110px"> <img src="http://s21.postimg.org/4657b7m0j/morph1.gif" width="110px"> <img src="http://s28.postimg.org/8mdcxb48t/morph5.gif" width="110px"> <img src="http://s18.postimg.org/79coo8vid/morph3.gif" width="120px"> <img src="http://s9.postimg.org/a5tdgfppn/morph4.gif" width="140px">
 
  The problem
 --
